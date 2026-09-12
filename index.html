@@ -73,7 +73,7 @@
   }
   .filters .full{flex-basis:100%;}
 
-  .share-row{display:flex;gap:8px;margin-bottom:14px;}
+  .share-row{display:flex;gap:8px;margin-bottom:14px;align-items:center;}
   .btn{
     padding:11px 16px;border-radius:10px;border:none;font-weight:600;
     font-size:.9rem;cursor:pointer;
@@ -93,6 +93,7 @@
     background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
     overflow:hidden;position:relative;
   }
+  .card.soldout{opacity:.55;}
   .card .thumb{
     width:100%;aspect-ratio:1/1;background:var(--accent-soft);
     display:flex;align-items:center;justify-content:center;overflow:hidden;
@@ -105,6 +106,8 @@
   .card .info{padding:9px 10px 11px;}
   .card .name{font-size:.88rem;font-weight:700;line-height:1.2;}
   .card .meta{font-size:.76rem;color:var(--ink-soft);margin-top:3px;}
+  .card .sizes-line{font-size:.74rem;color:var(--accent);margin-top:4px;font-weight:600;}
+  .card .soldout-tag{font-size:.74rem;color:var(--danger);margin-top:4px;font-weight:700;}
   .card .pick{
     position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;
     border:2px solid #fff;background:rgba(255,255,255,.35);
@@ -119,6 +122,17 @@
   }
   .card .admin-actions .del{color:var(--danger);border-color:var(--danger-soft);}
   .card .admin-actions .ed{color:var(--accent);}
+
+  .variant-list{display:flex;flex-wrap:wrap;gap:5px;padding:0 10px 10px;}
+  .variant-chip{
+    display:flex;align-items:center;gap:6px;background:var(--accent-soft);color:var(--accent);
+    border-radius:16px;padding:4px 6px 4px 10px;font-size:.74rem;font-weight:700;
+  }
+  .variant-chip.zero{background:var(--danger-soft);color:var(--danger);}
+  .variant-chip button{
+    border:none;background:rgba(255,255,255,.7);color:inherit;border-radius:50%;
+    width:18px;height:18px;font-size:.65rem;line-height:1;font-weight:700;
+  }
 
   .empty{
     text-align:center;color:var(--ink-soft);padding:50px 20px;font-size:.92rem;
@@ -153,6 +167,19 @@
   .addnew-row input{flex:1;}
   .addnew-row button{padding:0 12px;border-radius:10px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:700;}
 
+  .size-picker{display:flex;flex-wrap:wrap;gap:8px;}
+  .size-toggle{
+    padding:8px 13px;border-radius:20px;border:1px solid var(--line);background:var(--card);
+    color:var(--ink);font-size:.85rem;font-weight:600;
+  }
+  .size-toggle.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .qty-rows{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+  .qty-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;}
+  .qty-row .lbl{font-weight:700;font-size:.88rem;}
+  .qty-stepper{display:flex;align-items:center;gap:10px;}
+  .qty-stepper button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--bg);font-size:1rem;font-weight:700;color:var(--accent);}
+  .qty-stepper span{min-width:22px;text-align:center;font-weight:700;}
+
   .photo-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
   .photo-thumb{position:relative;width:74px;height:74px;border-radius:10px;overflow:hidden;border:1px solid var(--line);}
   .photo-thumb img{width:100%;height:100%;object-fit:cover;}
@@ -173,6 +200,8 @@
   .detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:.92rem;}
   .detail-row .k{color:var(--ink-soft);}
   .detail-row .v{font-weight:600;text-align:right;max-width:60%;}
+  .detail-sizes{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:60%;}
+  .detail-sizes span{background:var(--accent-soft);color:var(--accent);padding:3px 9px;border-radius:12px;font-size:.78rem;font-weight:700;}
   .detail-notes{margin-top:12px;font-size:.9rem;color:var(--ink);line-height:1.45;}
 
   .confirm-box{padding:6px 2px 2px;}
@@ -251,6 +280,17 @@ let items = load(LS_ITEMS, []);
 let categories = load(LS_CATS, ['Bodies','Remeras','Pantalones','Conjuntos','Camperas','Vestidos','Pijamas','Accesorios']);
 let sizes = load(LS_SIZES, ['Prematuro','RN','0-3M','3-6M','6-9M','9-12M','12-18M','18-24M','2','4','6','8']);
 
+/* Migración: prendas viejas tenían "size" único -> ahora usamos "variants":[{size,qty}] */
+let migrated = false;
+items.forEach(it=>{
+  if(!it.variants){
+    it.variants = it.size ? [{size: it.size, qty: 1}] : [];
+    delete it.size;
+    migrated = true;
+  }
+});
+if(migrated) save(LS_ITEMS, items);
+
 function persistItems(){ save(LS_ITEMS, items); }
 function persistCats(){ save(LS_CATS, categories); }
 function persistSizes(){ save(LS_SIZES, sizes); }
@@ -260,6 +300,8 @@ let currentView = 'catalog'; // 'catalog' | 'admin'
 
 /* ---------------- Utilities ---------------- */
 function uid(){ return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function totalQty(it){ return it.variants.reduce((s,v)=>s+v.qty,0); }
 
 function compressImage(file, maxSize=1000, quality=0.72){
   return new Promise((resolve, reject)=>{
@@ -312,26 +354,31 @@ function refreshFilterSelects(){
   fillSelect(document.getElementById('aCategory'), categories, 'Todas las categorías');
   fillSelect(document.getElementById('aSize'), sizes, 'Todos los talles');
 }
-function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 /* ---------------- Filtering ---------------- */
-function getFiltered(prefix){
+function getFiltered(prefix, onlyInStock){
   const search = document.getElementById(prefix+'Search').value.trim().toLowerCase();
   const cat = document.getElementById(prefix==='f'?'fCategory':'aCategory').value;
   const size = document.getElementById(prefix==='f'?'fSize':'aSize').value;
   return items.filter(it=>{
     if(search && !it.name.toLowerCase().includes(search)) return false;
     if(cat && it.category !== cat) return false;
-    if(size && it.size !== size) return false;
+    if(size && !it.variants.some(v=>v.size===size && v.qty>0)) return false;
+    if(onlyInStock && totalQty(it) <= 0) return false;
     return true;
   }).sort((a,b)=> b.createdAt - a.createdAt);
+}
+
+function sizesLine(it){
+  return it.variants.filter(v=>v.qty>0).map(v=>`${v.size} (${v.qty})`).join(' · ');
 }
 
 /* ---------------- Rendering: Catalog (view-only) ---------------- */
 function renderCatalog(){
   const grid = document.getElementById('catalogGrid');
   const empty = document.getElementById('catalogEmpty');
-  const list = getFiltered('f');
+  const list = getFiltered('f', true); // catálogo solo muestra lo que hay en stock
   grid.innerHTML = '';
   empty.classList.toggle('hide', list.length>0);
   list.forEach(it=>{
@@ -346,7 +393,8 @@ function renderCatalog(){
       </div>
       <div class="info" data-open="${it.id}">
         <div class="name">${escapeHtml(it.name)}</div>
-        <div class="meta">${escapeHtml(it.category||'—')} · Talle ${escapeHtml(it.size||'—')}</div>
+        <div class="meta">${escapeHtml(it.category||'—')}</div>
+        <div class="sizes-line">${escapeHtml(sizesLine(it))}</div>
       </div>`;
     grid.appendChild(card);
   });
@@ -362,13 +410,19 @@ function updateSelCount(){
 function renderAdmin(){
   const grid = document.getElementById('adminGrid');
   const empty = document.getElementById('adminEmpty');
-  const list = getFiltered('a');
+  const list = getFiltered('a', false); // admin ve todo, incluso sin stock
   grid.innerHTML = '';
   empty.classList.toggle('hide', list.length>0);
   list.forEach(it=>{
     const card = document.createElement('div');
-    card.className = 'card';
+    const soldOut = totalQty(it) <= 0;
+    card.className = 'card' + (soldOut?' soldout':'');
     const thumb = it.photos[0];
+    const variantsHtml = it.variants.length ? it.variants.map(v=>`
+      <div class="variant-chip ${v.qty<=0?'zero':''}">
+        ${escapeHtml(v.size)}: ${v.qty}
+        ${v.qty>0 ? `<button data-sell="${it.id}" data-size="${escapeHtml(v.size)}" title="Marcar vendido">−</button>` : ''}
+      </div>`).join('') : `<span style="font-size:.74rem;color:var(--ink-soft)">Sin talles cargados</span>`;
     card.innerHTML = `
       <div class="thumb">
         ${thumb ? `<img src="${thumb}">` : `<span style="font-size:1.6rem">👕</span>`}
@@ -376,8 +430,10 @@ function renderAdmin(){
       </div>
       <div class="info">
         <div class="name">${escapeHtml(it.name)}</div>
-        <div class="meta">${escapeHtml(it.category||'—')} · Talle ${escapeHtml(it.size||'—')}</div>
+        <div class="meta">${escapeHtml(it.category||'—')}</div>
+        ${soldOut?'<div class="soldout-tag">Sin stock</div>':''}
       </div>
+      <div class="variant-list">${variantsHtml}</div>
       <div class="admin-actions">
         <button class="ed" data-edit="${it.id}">Editar</button>
         <button class="del" data-del="${it.id}">Eliminar</button>
@@ -426,6 +482,8 @@ document.getElementById('adminGrid').addEventListener('click', e=>{
   if(ed){ openForm(ed.dataset.edit); return; }
   const del = e.target.closest('[data-del]');
   if(del){ confirmDelete(del.dataset.del); return; }
+  const sell = e.target.closest('[data-sell]');
+  if(sell){ confirmSell(sell.dataset.sell, sell.dataset.size); return; }
 });
 
 document.getElementById('fabAdd').onclick = ()=>openForm(null);
@@ -435,6 +493,7 @@ function openDetail(id){
   const it = items.find(x=>x.id===id);
   if(!it) return;
   const root = document.getElementById('modalRoot');
+  const availableVariants = it.variants.filter(v=>v.qty>0);
   root.innerHTML = `
     <div class="overlay" id="ov">
       <div class="sheet">
@@ -446,7 +505,7 @@ function openDetail(id){
           ${it.photos.length ? it.photos.map(p=>`<img src="${p}">`).join('') : '<div style="padding:40px 0;color:var(--ink-soft);text-align:center;width:100%">Sin fotos</div>'}
         </div>
         <div class="detail-row"><span class="k">Categoría</span><span class="v">${escapeHtml(it.category||'—')}</span></div>
-        <div class="detail-row"><span class="k">Talle</span><span class="v">${escapeHtml(it.size||'—')}</span></div>
+        <div class="detail-row"><span class="k">Talles disponibles</span><span class="v detail-sizes">${availableVariants.map(v=>`<span>${escapeHtml(v.size)} · ${v.qty}</span>`).join('')||'—'}</span></div>
         ${it.price ? `<div class="detail-row"><span class="k">Precio</span><span class="v">$${escapeHtml(it.price)}</span></div>` : ''}
         ${it.notes ? `<div class="detail-notes">${escapeHtml(it.notes)}</div>` : ''}
       </div>
@@ -458,11 +517,14 @@ function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
 
 /* ---------------- Add / Edit form ---------------- */
 let formPhotos = []; // array of dataURLs while editing
+let formVariants = {}; // { size: qty } mientras se edita el formulario
 
 function openForm(id){
   const editing = !!id;
-  const it = editing ? items.find(x=>x.id===id) : {name:'',category:'',size:'',price:'',notes:''};
+  const it = editing ? items.find(x=>x.id===id) : {name:'',category:'',price:'',notes:'',variants:[]};
   formPhotos = editing ? [...it.photos] : [];
+  formVariants = {};
+  it.variants.forEach(v=>{ formVariants[v.size] = v.qty; });
 
   const root = document.getElementById('modalRoot');
   root.innerHTML = `
@@ -488,12 +550,13 @@ function openForm(id){
         </label>
 
         <label class="field">
-          <span>Talle</span>
-          <select id="fSizeSel"></select>
+          <span>Talles (podés elegir varios y cargar cuántos tenés de cada uno)</span>
+          <div class="size-picker" id="sizePicker"></div>
           <div class="addnew-row">
             <input type="text" id="newSize" placeholder="Nuevo talle...">
             <button id="addSizeBtn" type="button">Agregar</button>
           </div>
+          <div class="qty-rows" id="qtyRows"></div>
         </label>
 
         <label class="field">
@@ -509,7 +572,7 @@ function openForm(id){
         <label class="field">
           <span>Fotos</span>
           <div class="photo-row" id="photoRow"></div>
-          <input type="file" id="fileInput" accept="image/*" multiple capture="environment" style="display:none">
+          <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
         </label>
 
         <div class="confirm-actions" style="margin-top:8px;">
@@ -520,10 +583,9 @@ function openForm(id){
     </div>`;
 
   fillSelect(document.getElementById('fCategorySel'), categories, 'Elegir categoría');
-  fillSelect(document.getElementById('fSizeSel'), sizes, 'Elegir talle');
   document.getElementById('fCategorySel').value = it.category || '';
-  document.getElementById('fSizeSel').value = it.size || '';
 
+  renderSizePicker();
   renderPhotoRow();
 
   document.getElementById('addCatBtn').onclick = ()=>{
@@ -540,8 +602,8 @@ function openForm(id){
     if(!v) return;
     if(!sizes.includes(v)) sizes.push(v);
     persistSizes(); refreshFilterSelects();
-    fillSelect(document.getElementById('fSizeSel'), sizes, 'Elegir talle');
-    document.getElementById('fSizeSel').value = v;
+    formVariants[v] = formVariants[v] || 1;
+    renderSizePicker();
     document.getElementById('newSize').value='';
   };
 
@@ -552,14 +614,18 @@ function openForm(id){
   document.getElementById('saveForm').onclick = ()=>{
     const name = document.getElementById('fName').value.trim();
     if(!name){ showToast('Poné un nombre para la prenda'); return; }
+    const variants = Object.keys(formVariants)
+      .filter(s=>formVariants[s] > 0)
+      .map(s=>({size:s, qty:formVariants[s]}));
+    if(variants.length === 0){ showToast('Elegí al menos un talle con cantidad'); return; }
     const data = {
       id: editing ? it.id : uid(),
       name,
       category: document.getElementById('fCategorySel').value,
-      size: document.getElementById('fSizeSel').value,
       price: document.getElementById('fPrice').value.trim(),
       notes: document.getElementById('fNotes').value.trim(),
       photos: formPhotos,
+      variants,
       createdAt: editing ? it.createdAt : Date.now()
     };
     if(editing){
@@ -573,6 +639,47 @@ function openForm(id){
     renderAll();
     showToast(editing?'Cambios guardados':'Prenda agregada');
   };
+}
+
+function renderSizePicker(){
+  const picker = document.getElementById('sizePicker');
+  picker.innerHTML = sizes.map(s=>`
+    <button type="button" class="size-toggle ${formVariants.hasOwnProperty(s)?'on':''}" data-size="${escapeHtml(s)}">${escapeHtml(s)}</button>
+  `).join('');
+  picker.querySelectorAll('[data-size]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const s = btn.dataset.size;
+      if(formVariants.hasOwnProperty(s)){ delete formVariants[s]; }
+      else { formVariants[s] = 1; }
+      renderSizePicker();
+      renderQtyRows();
+    };
+  });
+  renderQtyRows();
+}
+
+function renderQtyRows(){
+  const wrap = document.getElementById('qtyRows');
+  const keys = Object.keys(formVariants);
+  wrap.innerHTML = keys.map(s=>`
+    <div class="qty-row">
+      <span class="lbl">${escapeHtml(s)}</span>
+      <div class="qty-stepper">
+        <button type="button" data-dec="${escapeHtml(s)}">−</button>
+        <span>${formVariants[s]}</span>
+        <button type="button" data-inc="${escapeHtml(s)}">+</button>
+      </div>
+    </div>`).join('');
+  wrap.querySelectorAll('[data-inc]').forEach(b=>{
+    b.onclick = ()=>{ formVariants[b.dataset.inc]++; renderQtyRows(); };
+  });
+  wrap.querySelectorAll('[data-dec]').forEach(b=>{
+    b.onclick = ()=>{
+      const s = b.dataset.dec;
+      formVariants[s] = Math.max(1, formVariants[s]-1);
+      renderQtyRows();
+    };
+  });
 }
 
 function renderPhotoRow(){
@@ -633,6 +740,37 @@ function confirmDelete(id){
   };
 }
 
+/* ---------------- Marcar vendido (descuenta stock de un talle) ---------------- */
+function confirmSell(id, size){
+  const it = items.find(x=>x.id===id);
+  if(!it) return;
+  const variant = it.variants.find(v=>v.size===size);
+  if(!variant || variant.qty<=0) return;
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = `
+    <div class="overlay" id="ov">
+      <div class="sheet">
+        <div class="sheet-head"><h3>Marcar como vendido</h3></div>
+        <div class="confirm-box">
+          <p>¿Confirmás que se vendió <strong>${escapeHtml(it.name)}</strong> talle <strong>${escapeHtml(size)}</strong>? Quedarían ${variant.qty-1} de ese talle.</p>
+          <div class="confirm-actions">
+            <button class="btn-ghost" id="cancelSell">Cancelar</button>
+            <button class="btn-accent" id="okSell">Confirmar venta</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('cancelSell').onclick = closeModal;
+  document.getElementById('ov').onclick = (ev)=>{ if(ev.target.id==='ov') closeModal(); };
+  document.getElementById('okSell').onclick = ()=>{
+    variant.qty = Math.max(0, variant.qty - 1);
+    persistItems();
+    closeModal();
+    renderAll();
+    showToast('Venta registrada, stock actualizado');
+  };
+}
+
 /* ---------------- Share selected ---------------- */
 document.getElementById('btnShare').onclick = async ()=>{
   if(selectedIds.size===0) return;
@@ -646,7 +784,7 @@ document.getElementById('btnShare').onclick = async ()=>{
     return;
   }
   const files = allPhotos.map(p=>dataURLtoFile(p.dataUrl, p.name));
-  const namesList = selectedItems.map(i=>`${i.name} (talle ${i.size||'—'})`).join(', ');
+  const namesList = selectedItems.map(i=>`${i.name} (${sizesLine(i)||'sin stock'})`).join(', ');
 
   if(navigator.canShare && navigator.canShare({files})){
     try{
