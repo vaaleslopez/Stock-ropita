@@ -27,14 +27,16 @@ self.addEventListener('fetch', (event) => {
   // Solo cacheamos peticiones GET de nuestro propio origen
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
-        // Guardamos copia en cache para la próxima vez, sin romper si falla
+    fetch(event.request)
+      .then((response) => {
+        // Hay internet: guardamos copia fresca en cache y la devolvemos
         const clone = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         return response;
-      }).catch(() => cached);
-    })
+      })
+      .catch(() => {
+        // Sin internet: recurrimos a la última copia guardada
+        return caches.match(event.request);
+      })
   );
 });
