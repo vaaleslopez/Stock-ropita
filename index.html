@@ -280,6 +280,10 @@
       <button class="btn btn-accent" id="btnShare">Compartir seleccionados</button>
       <span class="count-pill" id="selCount">0 seleccionados</span>
     </div>
+    <label style="display:flex;align-items:center;gap:8px;margin:-8px 0 14px;font-size:.82rem;color:var(--ink-soft);">
+      <input type="checkbox" id="includeTextChk" style="width:16px;height:16px;">
+      Incluir texto con nombre y talles junto a las fotos
+    </label>
     <div class="grid" id="catalogGrid"></div>
     <div class="empty hide" id="catalogEmpty">No hay prendas que coincidan con el filtro.</div>
   </div>
@@ -880,6 +884,16 @@ function confirmSell(id, size){
 }
 
 /* ---------------- Share selected ---------------- */
+function shareTextFor(selectedItems){
+  const lines = selectedItems.map(it=>{
+    const sizesOnly = it.variants.filter(v=>v.qty>0).map(v=>v.size);
+    const sizesTxt = sizesOnly.length ? `Talle${sizesOnly.length>1?'s':''} ${sizesOnly.join(', ')}` : 'sin stock';
+    const priceTxt = it.price ? ` — $${it.price}` : '';
+    return `• ${it.name} (${sizesTxt})${priceTxt}`;
+  });
+  return `Ropita disponible:\n${lines.join('\n')}`;
+}
+
 document.getElementById('btnShare').onclick = async ()=>{
   if(selectedIds.size===0) return;
   const selectedItems = items.filter(i=>selectedIds.has(i.id));
@@ -892,15 +906,14 @@ document.getElementById('btnShare').onclick = async ()=>{
     return;
   }
   const files = allPhotos.map(p=>dataURLtoFile(p.dataUrl, p.name));
-  const namesList = selectedItems.map(i=>`${i.name} (${sizesLine(i)||'sin stock'})`).join(', ');
+  const includeText = document.getElementById('includeTextChk').checked;
+  const shareText = includeText ? shareTextFor(selectedItems) : '';
 
   if(navigator.canShare && navigator.canShare({files})){
     try{
-      await navigator.share({
-        files,
-        title:'Stock disponible',
-        text:`Te comparto: ${namesList}`
-      });
+      const shareData = { files, title:'Stock disponible' };
+      if(shareText) shareData.text = shareText;
+      await navigator.share(shareData);
       return;
     }catch(err){
       if(err.name === 'AbortError') return;
@@ -908,7 +921,7 @@ document.getElementById('btnShare').onclick = async ()=>{
     }
   }
   // Fallback: no Web Share API con archivos disponible en este navegador
-  openFallbackShare(allPhotos, namesList);
+  openFallbackShare(allPhotos, shareText);
 };
 
 function openFallbackShare(photos, namesList){
