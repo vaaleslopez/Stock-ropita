@@ -215,6 +215,43 @@
     font-size:.85rem;z-index:30;opacity:0;transition:opacity .25s;pointer-events:none;
   }
   .toast.show{opacity:1;}
+
+  /* Sales section */
+  .sales-toggle{display:flex;gap:8px;margin-bottom:14px;}
+  .sales-toggle button{
+    flex:1;padding:9px 0;border-radius:10px;border:1px solid var(--line);
+    background:var(--card);color:var(--ink-soft);font-weight:700;font-size:.85rem;
+  }
+  .sales-toggle button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .sales-summary{
+    display:flex;gap:10px;margin-bottom:14px;
+  }
+  .sales-summary .box{
+    flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:12px;text-align:center;
+  }
+  .sales-summary .box .n{font-size:1.15rem;font-weight:800;color:var(--accent);}
+  .sales-summary .box .l{font-size:.72rem;color:var(--ink-soft);margin-top:2px;}
+  .month-group{margin-bottom:18px;}
+  .month-group h3{
+    font-size:.95rem;text-transform:capitalize;margin-bottom:8px;
+    display:flex;justify-content:space-between;align-items:baseline;
+  }
+  .month-group h3 .mcount{font-size:.76rem;color:var(--ink-soft);font-weight:600;}
+  .sale-row{
+    display:flex;gap:10px;align-items:center;background:var(--card);
+    border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-bottom:8px;
+  }
+  .sale-row .sthumb{
+    width:46px;height:46px;border-radius:8px;overflow:hidden;flex-shrink:0;
+    background:var(--accent-soft);display:flex;align-items:center;justify-content:center;
+  }
+  .sale-row .sthumb img{width:100%;height:100%;object-fit:cover;}
+  .sale-row .sinfo{flex:1;min-width:0;}
+  .sale-row .sname{font-size:.85rem;font-weight:700;line-height:1.2;}
+  .sale-row .smeta{font-size:.74rem;color:var(--ink-soft);margin-top:2px;}
+  .sale-row .sprice{font-size:.82rem;font-weight:700;color:var(--accent);white-space:nowrap;}
+  .sale-row .sdel{background:none;border:none;color:var(--danger);font-size:1rem;padding:4px;}
 </style>
 </head>
 <body>
@@ -250,6 +287,19 @@
     <div class="empty hide" id="adminEmpty">Todavía no agregaste ninguna prenda. Tocá el botón + para empezar.</div>
   </div>
 
+  <div id="viewSales" class="hide">
+    <div class="sales-toggle">
+      <button id="salesModeMonth" class="active">Por mes</button>
+      <button id="salesModeList">Lista completa</button>
+    </div>
+    <div class="sales-summary">
+      <div class="box"><div class="n" id="salesTotalCount">0</div><div class="l">prendas vendidas</div></div>
+      <div class="box"><div class="n" id="salesTotalMoney">$0</div><div class="l">total vendido</div></div>
+    </div>
+    <div id="salesContent"></div>
+    <div class="empty hide" id="salesEmpty">Todavía no registraste ninguna venta.</div>
+  </div>
+
 </main>
 
 <button class="fab hide" id="fabAdd">+</button>
@@ -257,6 +307,7 @@
 <nav class="tabs">
   <button id="tabCatalogBtn" class="active"><span class="ic">👀</span>Ver</button>
   <button id="tabAdminBtn"><span class="ic">✏️</span>Administrar</button>
+  <button id="tabSalesBtn"><span class="ic">💰</span>Vendido</button>
 </nav>
 
 <div id="modalRoot"></div>
@@ -267,6 +318,7 @@
 const LS_ITEMS = 'ropita_items';
 const LS_CATS = 'ropita_categories';
 const LS_SIZES = 'ropita_sizes';
+const LS_SALES = 'ropita_sales';
 
 function load(key, fallback){
   try{
@@ -279,6 +331,7 @@ function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 let items = load(LS_ITEMS, []);
 let categories = load(LS_CATS, ['Bodies','Remeras','Pantalones','Conjuntos','Camperas','Vestidos','Pijamas','Accesorios']);
 let sizes = load(LS_SIZES, ['Prematuro','RN','0-3M','3-6M','6-9M','9-12M','12-18M','18-24M','2','4','6','8']);
+let sales = load(LS_SALES, []);
 
 /* Migración: prendas viejas tenían "size" único -> ahora usamos "variants":[{size,qty}] */
 let migrated = false;
@@ -294,6 +347,7 @@ if(migrated) save(LS_ITEMS, items);
 function persistItems(){ save(LS_ITEMS, items); }
 function persistCats(){ save(LS_CATS, categories); }
 function persistSizes(){ save(LS_SIZES, sizes); }
+function persistSales(){ save(LS_SALES, sales); }
 
 let selectedIds = new Set();
 let currentView = 'catalog'; // 'catalog' | 'admin'
@@ -445,14 +499,17 @@ function renderAdmin(){
 /* ---------------- Tabs ---------------- */
 document.getElementById('tabCatalogBtn').onclick = ()=>switchView('catalog');
 document.getElementById('tabAdminBtn').onclick = ()=>switchView('admin');
+document.getElementById('tabSalesBtn').onclick = ()=>switchView('sales');
 function switchView(v){
   currentView = v;
   document.getElementById('viewCatalog').classList.toggle('hide', v!=='catalog');
   document.getElementById('viewAdmin').classList.toggle('hide', v!=='admin');
+  document.getElementById('viewSales').classList.toggle('hide', v!=='sales');
   document.getElementById('tabCatalogBtn').classList.toggle('active', v==='catalog');
   document.getElementById('tabAdminBtn').classList.toggle('active', v==='admin');
+  document.getElementById('tabSalesBtn').classList.toggle('active', v==='sales');
   document.getElementById('fabAdd').classList.toggle('hide', v!=='admin');
-  document.getElementById('headerSub').textContent = v==='catalog' ? 'Catálogo (solo ver)' : 'Administrar stock';
+  document.getElementById('headerSub').textContent = v==='catalog' ? 'Catálogo (solo ver)' : (v==='admin' ? 'Administrar stock' : 'Historial de ventas');
   renderAll();
 }
 
@@ -765,6 +822,17 @@ function confirmSell(id, size){
   document.getElementById('okSell').onclick = ()=>{
     variant.qty = Math.max(0, variant.qty - 1);
     persistItems();
+    sales.push({
+      id: uid(),
+      itemId: it.id,
+      name: it.name,
+      category: it.category,
+      size: size,
+      price: it.price,
+      photo: it.photos[0] || null,
+      soldAt: Date.now()
+    });
+    persistSales();
     closeModal();
     renderAll();
     showToast('Venta registrada, stock actualizado');
@@ -824,11 +892,112 @@ function openFallbackShare(photos, namesList){
   document.getElementById('ov').onclick = (ev)=>{ if(ev.target.id==='ov') closeModal(); };
 }
 
+/* ---------------- Vendido: por mes / lista completa ---------------- */
+let salesMode = 'month'; // 'month' | 'list'
+
+document.getElementById('salesModeMonth').onclick = ()=>{ salesMode='month'; renderSales(); };
+document.getElementById('salesModeList').onclick = ()=>{ salesMode='list'; renderSales(); };
+
+function moneyFmt(n){
+  if(!n || isNaN(n)) return null;
+  return '$' + Number(n).toLocaleString('es-AR');
+}
+
+function saleRowHtml(s){
+  const dateStr = new Date(s.soldAt).toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit', year:'numeric'});
+  return `
+    <div class="sale-row">
+      <div class="sthumb">${s.photo ? `<img src="${s.photo}">` : '👕'}</div>
+      <div class="sinfo">
+        <div class="sname">${escapeHtml(s.name)}</div>
+        <div class="smeta">${escapeHtml(s.category||'—')} · Talle ${escapeHtml(s.size)} · ${dateStr}</div>
+      </div>
+      ${s.price ? `<div class="sprice">${moneyFmt(s.price)}</div>` : ''}
+      <button class="sdel" data-delsale="${s.id}" title="Eliminar registro">✕</button>
+    </div>`;
+}
+
+function renderSales(){
+  document.getElementById('salesModeMonth').classList.toggle('active', salesMode==='month');
+  document.getElementById('salesModeList').classList.toggle('active', salesMode==='list');
+
+  const content = document.getElementById('salesContent');
+  const empty = document.getElementById('salesEmpty');
+  const sorted = [...sales].sort((a,b)=>b.soldAt-a.soldAt);
+
+  empty.classList.toggle('hide', sorted.length>0);
+
+  // Resumen total
+  const totalCount = sorted.length;
+  const totalMoney = sorted.reduce((s,x)=> s + (Number(x.price)||0), 0);
+  document.getElementById('salesTotalCount').textContent = totalCount;
+  document.getElementById('salesTotalMoney').textContent = totalMoney>0 ? moneyFmt(totalMoney) : '$0';
+
+  if(sorted.length===0){ content.innerHTML=''; return; }
+
+  if(salesMode === 'list'){
+    content.innerHTML = sorted.map(saleRowHtml).join('');
+  } else {
+    // Agrupar por mes
+    const groups = {};
+    sorted.forEach(s=>{
+      const d = new Date(s.soldAt);
+      const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+      if(!groups[key]) groups[key] = [];
+      groups[key].push(s);
+    });
+    content.innerHTML = Object.keys(groups).sort().reverse().map(key=>{
+      const list = groups[key];
+      const label = new Date(list[0].soldAt).toLocaleDateString('es-AR', {month:'long', year:'numeric'});
+      const monthMoney = list.reduce((s,x)=> s + (Number(x.price)||0), 0);
+      return `
+        <div class="month-group">
+          <h3>${escapeHtml(label)} <span class="mcount">${list.length} vendidas${monthMoney>0?' · '+moneyFmt(monthMoney):''}</span></h3>
+          ${list.map(saleRowHtml).join('')}
+        </div>`;
+    }).join('');
+  }
+}
+
+document.getElementById('salesContent').addEventListener('click', e=>{
+  const del = e.target.closest('[data-delsale]');
+  if(del){ confirmDeleteSale(del.dataset.delsale); }
+});
+
+function confirmDeleteSale(id){
+  const s = sales.find(x=>x.id===id);
+  if(!s) return;
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = `
+    <div class="overlay" id="ov">
+      <div class="sheet">
+        <div class="sheet-head"><h3>Eliminar registro de venta</h3></div>
+        <div class="confirm-box">
+          <p>¿Seguro que querés eliminar el registro de venta de "<strong>${escapeHtml(s.name)}</strong>" (talle ${escapeHtml(s.size)})? Esto no repone el stock, solo borra el registro del historial.</p>
+          <div class="confirm-actions">
+            <button class="btn-ghost" id="cancelDelSale">Cancelar</button>
+            <button class="btn-danger" id="okDelSale">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('cancelDelSale').onclick = closeModal;
+  document.getElementById('ov').onclick = (ev)=>{ if(ev.target.id==='ov') closeModal(); };
+  document.getElementById('okDelSale').onclick = ()=>{
+    sales = sales.filter(x=>x.id!==id);
+    persistSales();
+    closeModal();
+    renderSales();
+    showToast('Registro eliminado');
+  };
+}
+
 /* ---------------- Init ---------------- */
 function renderAll(){
   refreshFilterSelects();
   renderCatalog();
   renderAdmin();
+  renderSales();
 }
 renderAll();
 switchView('catalog');
