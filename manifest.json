@@ -1,0 +1,15 @@
+{
+  "name": "Ropita Stock",
+  "short_name": "Ropita Stock",
+  "description": "Inventario de ropa de bebés y niños para vender",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#faf7f2",
+  "theme_color": "#4f7a6b",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

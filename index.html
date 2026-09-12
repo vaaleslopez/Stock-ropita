@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Ropita Stock</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#4f7a6b">
+<style>
+  :root{
+    --bg:#faf7f2;
+    --card:#ffffff;
+    --ink:#2e2a26;
+    --ink-soft:#6f6a63;
+    --line:#e7e1d8;
+    --accent:#4f7a6b;
+    --accent-soft:#e4efe9;
+    --danger:#b3543f;
+    --danger-soft:#f6e6e1;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    padding-bottom:78px;
+  }
+  h1,h2,h3{margin:0;font-weight:700;letter-spacing:-0.01em;}
+  button{font-family:inherit;}
+  .hide{display:none !important;}
+
+  /* Header */
+  header{
+    padding:18px 16px 14px;
+    background:var(--bg);
+    position:sticky;top:0;z-index:5;
+    border-bottom:1px solid var(--line);
+  }
+  header h1{font-size:1.35rem;}
+  header .sub{color:var(--ink-soft);font-size:.85rem;margin-top:2px;}
+
+  /* Bottom nav */
+  nav.tabs{
+    position:fixed;bottom:0;left:0;right:0;
+    display:flex;background:var(--card);
+    border-top:1px solid var(--line);
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom));
+    z-index:10;
+  }
+  nav.tabs button{
+    flex:1;background:none;border:none;padding:8px 4px;
+    color:var(--ink-soft);font-size:.78rem;font-weight:600;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    border-radius:10px;
+  }
+  nav.tabs button .ic{font-size:1.25rem;}
+  nav.tabs button.active{color:var(--accent);background:var(--accent-soft);}
+
+  main{padding:14px 16px 20px;max-width:640px;margin:0 auto;}
+
+  /* Filter bar */
+  .filters{
+    display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;
+  }
+  .filters select, .filters input[type=text]{
+    flex:1;min-width:120px;padding:10px 12px;border-radius:10px;
+    border:1px solid var(--line);background:var(--card);color:var(--ink);
+    font-size:.9rem;
+  }
+  .filters .full{flex-basis:100%;}
+
+  .share-row{display:flex;gap:8px;margin-bottom:14px;}
+  .btn{
+    padding:11px 16px;border-radius:10px;border:none;font-weight:600;
+    font-size:.9rem;cursor:pointer;
+  }
+  .btn-accent{background:var(--accent);color:#fff;}
+  .btn-outline{background:var(--card);color:var(--accent);border:1px solid var(--accent);}
+  .btn-danger{background:var(--danger);color:#fff;}
+  .btn-ghost{background:none;color:var(--ink-soft);border:1px solid var(--line);}
+  .btn:disabled{opacity:.5;}
+  .count-pill{
+    align-self:center;color:var(--ink-soft);font-size:.82rem;
+  }
+
+  /* Grid of items */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;position:relative;
+  }
+  .card .thumb{
+    width:100%;aspect-ratio:1/1;background:var(--accent-soft);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  .card .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .card .thumb .ph-count{
+    position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);
+    color:#fff;font-size:.68rem;padding:2px 6px;border-radius:8px;
+  }
+  .card .info{padding:9px 10px 11px;}
+  .card .name{font-size:.88rem;font-weight:700;line-height:1.2;}
+  .card .meta{font-size:.76rem;color:var(--ink-soft);margin-top:3px;}
+  .card .pick{
+    position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;
+    border:2px solid #fff;background:rgba(255,255,255,.35);
+  }
+  .card .pick.on{background:var(--accent);border-color:var(--accent);}
+  .card .admin-actions{
+    display:flex;gap:6px;padding:0 10px 10px;
+  }
+  .card .admin-actions button{
+    flex:1;padding:7px 0;font-size:.76rem;border-radius:8px;border:1px solid var(--line);
+    background:var(--card);font-weight:600;
+  }
+  .card .admin-actions .del{color:var(--danger);border-color:var(--danger-soft);}
+  .card .admin-actions .ed{color:var(--accent);}
+
+  .empty{
+    text-align:center;color:var(--ink-soft);padding:50px 20px;font-size:.92rem;
+  }
+
+  /* FAB */
+  .fab{
+    position:fixed;right:18px;bottom:80px;width:56px;height:56px;border-radius:50%;
+    background:var(--accent);color:#fff;font-size:1.7rem;border:none;
+    box-shadow:0 6px 16px rgba(0,0,0,.2);z-index:8;
+  }
+
+  /* Modal */
+  .overlay{
+    position:fixed;inset:0;background:rgba(30,26,22,.5);z-index:20;
+    display:flex;align-items:flex-end;justify-content:center;
+  }
+  .sheet{
+    background:var(--bg);width:100%;max-width:640px;max-height:92vh;overflow-y:auto;
+    border-radius:20px 20px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));
+  }
+  .sheet .sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .sheet .close{background:none;border:none;font-size:1.4rem;color:var(--ink-soft);}
+  label.field{display:block;margin-bottom:14px;}
+  label.field span{display:block;font-size:.8rem;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
+  .field input[type=text], .field input[type=number], .field select, .field textarea{
+    width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);
+    background:var(--card);font-size:.95rem;color:var(--ink);
+  }
+  .field textarea{min-height:70px;resize:vertical;}
+  .addnew-row{display:flex;gap:6px;margin-top:6px;}
+  .addnew-row input{flex:1;}
+  .addnew-row button{padding:0 12px;border-radius:10px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:700;}
+
+  .photo-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  .photo-thumb{position:relative;width:74px;height:74px;border-radius:10px;overflow:hidden;border:1px solid var(--line);}
+  .photo-thumb img{width:100%;height:100%;object-fit:cover;}
+  .photo-thumb .rm{
+    position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;
+    border:none;border-radius:50%;width:20px;height:20px;font-size:.75rem;line-height:1;
+  }
+  .add-photo-btn{
+    width:74px;height:74px;border-radius:10px;border:2px dashed var(--line);
+    background:none;color:var(--ink-soft);font-size:1.5rem;
+  }
+
+  .detail-photos{display:flex;overflow-x:auto;gap:8px;margin:-4px -4px 14px;padding:4px;scroll-snap-type:x mandatory;}
+  .detail-photos img{
+    width:100%;max-width:100%;flex:0 0 100%;aspect-ratio:4/5;object-fit:cover;
+    border-radius:14px;scroll-snap-align:start;
+  }
+  .detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:.92rem;}
+  .detail-row .k{color:var(--ink-soft);}
+  .detail-row .v{font-weight:600;text-align:right;max-width:60%;}
+  .detail-notes{margin-top:12px;font-size:.9rem;color:var(--ink);line-height:1.45;}
+
+  .confirm-box{padding:6px 2px 2px;}
+  .confirm-box p{font-size:.95rem;margin:0 0 16px;color:var(--ink);}
+  .confirm-actions{display:flex;gap:10px;}
+  .confirm-actions button{flex:1;padding:12px;border-radius:10px;font-weight:700;font-size:.92rem;border:none;}
+
+  .toast{
+    position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#fff;padding:10px 18px;border-radius:20px;
+    font-size:.85rem;z-index:30;opacity:0;transition:opacity .25s;pointer-events:none;
+  }
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Ropita Stock</h1>
+  <div class="sub" id="headerSub">Catálogo</div>
+</header>
+
+<main>
+
+  <div id="viewCatalog">
+    <div class="filters">
+      <input type="text" id="fSearch" placeholder="Buscar por nombre...">
+      <select id="fCategory"><option value="">Todas las categorías</option></select>
+      <select id="fSize"><option value="">Todos los talles</option></select>
+    </div>
+    <div class="share-row">
+      <button class="btn btn-accent" id="btnShare">Compartir seleccionados</button>
+      <span class="count-pill" id="selCount">0 seleccionados</span>
+    </div>
+    <div class="grid" id="catalogGrid"></div>
+    <div class="empty hide" id="catalogEmpty">No hay prendas que coincidan con el filtro.</div>
+  </div>
+
+  <div id="viewAdmin" class="hide">
+    <div class="filters">
+      <input type="text" id="aSearch" placeholder="Buscar por nombre...">
+      <select id="aCategory"><option value="">Todas las categorías</option></select>
+      <select id="aSize"><option value="">Todos los talles</option></select>
+    </div>
+    <div class="grid" id="adminGrid"></div>
+    <div class="empty hide" id="adminEmpty">Todavía no agregaste ninguna prenda. Tocá el botón + para empezar.</div>
+  </div>
+
+</main>
+
+<button class="fab hide" id="fabAdd">+</button>
+
+<nav class="tabs">
+  <button id="tabCatalogBtn" class="active"><span class="ic">👀</span>Ver</button>
+  <button id="tabAdminBtn"><span class="ic">✏️</span>Administrar</button>
+</nav>
+
+<div id="modalRoot"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- Storage helpers ---------------- */
+const LS_ITEMS = 'ropita_items';
+const LS_CATS = 'ropita_categories';
+const LS_SIZES = 'ropita_sizes';
+
+function load(key, fallback){
+  try{
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : fallback;
+  }catch(e){ return fallback; }
+}
+function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+let items = load(LS_ITEMS, []);
+let categories = load(LS_CATS, ['Bodies','Remeras','Pantalones','Conjuntos','Camperas','Vestidos','Pijamas','Accesorios']);
+let sizes = load(LS_SIZES, ['Prematuro','RN','0-3M','3-6M','6-9M','9-12M','12-18M','18-24M','2','4','6','8']);
+
+function persistItems(){ save(LS_ITEMS, items); }
+function persistCats(){ save(LS_CATS, categories); }
+function persistSizes(){ save(LS_SIZES, sizes); }
+
+let selectedIds = new Set();
+let currentView = 'catalog'; // 'catalog' | 'admin'
+
+/* ---------------- Utilities ---------------- */
+function uid(){ return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function compressImage(file, maxSize=1000, quality=0.72){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = e=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let w = img.width, h = img.height;
+        if(w > h && w > maxSize){ h = Math.round(h*maxSize/w); w = maxSize; }
+        else if(h >= w && h > maxSize){ w = Math.round(w*maxSize/h); h = maxSize; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function dataURLtoFile(dataurl, filename){
+  const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8 = new Uint8Array(n);
+  while(n--){ u8[n] = bstr.charCodeAt(n); }
+  return new File([u8], filename, {type:mime});
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ---------------- Select population ---------------- */
+function fillSelect(sel, list, placeholder){
+  const current = sel.value;
+  sel.innerHTML = `<option value="">${placeholder}</option>` + list.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  if(list.includes(current)) sel.value = current;
+}
+function refreshFilterSelects(){
+  fillSelect(document.getElementById('fCategory'), categories, 'Todas las categorías');
+  fillSelect(document.getElementById('fSize'), sizes, 'Todos los talles');
+  fillSelect(document.getElementById('aCategory'), categories, 'Todas las categorías');
+  fillSelect(document.getElementById('aSize'), sizes, 'Todos los talles');
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---------------- Filtering ---------------- */
+function getFiltered(prefix){
+  const search = document.getElementById(prefix+'Search').value.trim().toLowerCase();
+  const cat = document.getElementById(prefix==='f'?'fCategory':'aCategory').value;
+  const size = document.getElementById(prefix==='f'?'fSize':'aSize').value;
+  return items.filter(it=>{
+    if(search && !it.name.toLowerCase().includes(search)) return false;
+    if(cat && it.category !== cat) return false;
+    if(size && it.size !== size) return false;
+    return true;
+  }).sort((a,b)=> b.createdAt - a.createdAt);
+}
+
+/* ---------------- Rendering: Catalog (view-only) ---------------- */
+function renderCatalog(){
+  const grid = document.getElementById('catalogGrid');
+  const empty = document.getElementById('catalogEmpty');
+  const list = getFiltered('f');
+  grid.innerHTML = '';
+  empty.classList.toggle('hide', list.length>0);
+  list.forEach(it=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    const thumb = it.photos[0];
+    card.innerHTML = `
+      <div class="pick ${selectedIds.has(it.id)?'on':''}" data-pick="${it.id}"></div>
+      <div class="thumb" data-open="${it.id}">
+        ${thumb ? `<img src="${thumb}">` : `<span style="font-size:1.6rem">👕</span>`}
+        ${it.photos.length>1?`<span class="ph-count">${it.photos.length} fotos</span>`:''}
+      </div>
+      <div class="info" data-open="${it.id}">
+        <div class="name">${escapeHtml(it.name)}</div>
+        <div class="meta">${escapeHtml(it.category||'—')} · Talle ${escapeHtml(it.size||'—')}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+  updateSelCount();
+}
+
+function updateSelCount(){
+  document.getElementById('selCount').textContent = selectedIds.size + ' seleccionados';
+  document.getElementById('btnShare').disabled = selectedIds.size === 0;
+}
+
+/* ---------------- Rendering: Admin ---------------- */
+function renderAdmin(){
+  const grid = document.getElementById('adminGrid');
+  const empty = document.getElementById('adminEmpty');
+  const list = getFiltered('a');
+  grid.innerHTML = '';
+  empty.classList.toggle('hide', list.length>0);
+  list.forEach(it=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    const thumb = it.photos[0];
+    card.innerHTML = `
+      <div class="thumb">
+        ${thumb ? `<img src="${thumb}">` : `<span style="font-size:1.6rem">👕</span>`}
+        ${it.photos.length>1?`<span class="ph-count">${it.photos.length} fotos</span>`:''}
+      </div>
+      <div class="info">
+        <div class="name">${escapeHtml(it.name)}</div>
+        <div class="meta">${escapeHtml(it.category||'—')} · Talle ${escapeHtml(it.size||'—')}</div>
+      </div>
+      <div class="admin-actions">
+        <button class="ed" data-edit="${it.id}">Editar</button>
+        <button class="del" data-del="${it.id}">Eliminar</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ---------------- Tabs ---------------- */
+document.getElementById('tabCatalogBtn').onclick = ()=>switchView('catalog');
+document.getElementById('tabAdminBtn').onclick = ()=>switchView('admin');
+function switchView(v){
+  currentView = v;
+  document.getElementById('viewCatalog').classList.toggle('hide', v!=='catalog');
+  document.getElementById('viewAdmin').classList.toggle('hide', v!=='admin');
+  document.getElementById('tabCatalogBtn').classList.toggle('active', v==='catalog');
+  document.getElementById('tabAdminBtn').classList.toggle('active', v==='admin');
+  document.getElementById('fabAdd').classList.toggle('hide', v!=='admin');
+  document.getElementById('headerSub').textContent = v==='catalog' ? 'Catálogo (solo ver)' : 'Administrar stock';
+  renderAll();
+}
+
+/* ---------------- Events: filters ---------------- */
+['fSearch','fCategory','fSize'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderCatalog);
+});
+['aSearch','aCategory','aSize'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderAdmin);
+});
+
+/* ---------------- Catalog interactions: select / open detail ---------------- */
+document.getElementById('catalogGrid').addEventListener('click', e=>{
+  const pick = e.target.closest('[data-pick]');
+  if(pick){
+    const id = pick.dataset.pick;
+    if(selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+    renderCatalog();
+    return;
+  }
+  const open = e.target.closest('[data-open]');
+  if(open){ openDetail(open.dataset.open); }
+});
+
+document.getElementById('adminGrid').addEventListener('click', e=>{
+  const ed = e.target.closest('[data-edit]');
+  if(ed){ openForm(ed.dataset.edit); return; }
+  const del = e.target.closest('[data-del]');
+  if(del){ confirmDelete(del.dataset.del); return; }
+});
+
+document.getElementById('fabAdd').onclick = ()=>openForm(null);
+
+/* ---------------- Detail (read-only) modal ---------------- */
+function openDetail(id){
+  const it = items.find(x=>x.id===id);
+  if(!it) return;
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = `
+    <div class="overlay" id="ov">
+      <div class="sheet">
+        <div class="sheet-head">
+          <h3>${escapeHtml(it.name)}</h3>
+          <button class="close" id="closeDetail">✕</button>
+        </div>
+        <div class="detail-photos">
+          ${it.photos.length ? it.photos.map(p=>`<img src="${p}">`).join('') : '<div style="padding:40px 0;color:var(--ink-soft);text-align:center;width:100%">Sin fotos</div>'}
+        </div>
+        <div class="detail-row"><span class="k">Categoría</span><span class="v">${escapeHtml(it.category||'—')}</span></div>
+        <div class="detail-row"><span class="k">Talle</span><span class="v">${escapeHtml(it.size||'—')}</span></div>
+        ${it.price ? `<div class="detail-row"><span class="k">Precio</span><span class="v">$${escapeHtml(it.price)}</span></div>` : ''}
+        ${it.notes ? `<div class="detail-notes">${escapeHtml(it.notes)}</div>` : ''}
+      </div>
+    </div>`;
+  document.getElementById('closeDetail').onclick = closeModal;
+  document.getElementById('ov').onclick = (ev)=>{ if(ev.target.id==='ov') closeModal(); };
+}
+function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
+
+/* ---------------- Add / Edit form ---------------- */
+let formPhotos = []; // array of dataURLs while editing
+
+function openForm(id){
+  const editing = !!id;
+  const it = editing ? items.find(x=>x.id===id) : {name:'',category:'',size:'',price:'',notes:''};
+  formPhotos = editing ? [...it.photos] : [];
+
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = `
+    <div class="overlay" id="ov">
+      <div class="sheet">
+        <div class="sheet-head">
+          <h3>${editing?'Editar prenda':'Agregar prenda'}</h3>
+          <button class="close" id="closeForm">✕</button>
+        </div>
+
+        <label class="field">
+          <span>Nombre</span>
+          <input type="text" id="fName" value="${escapeHtml(it.name)}" placeholder="Ej: Body manga larga rayas">
+        </label>
+
+        <label class="field">
+          <span>Categoría</span>
+          <select id="fCategorySel"></select>
+          <div class="addnew-row">
+            <input type="text" id="newCat" placeholder="Nueva categoría...">
+            <button id="addCatBtn" type="button">Agregar</button>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Talle</span>
+          <select id="fSizeSel"></select>
+          <div class="addnew-row">
+            <input type="text" id="newSize" placeholder="Nuevo talle...">
+            <button id="addSizeBtn" type="button">Agregar</button>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Precio (opcional)</span>
+          <input type="number" id="fPrice" value="${escapeHtml(it.price)}" placeholder="0">
+        </label>
+
+        <label class="field">
+          <span>Notas (opcional)</span>
+          <textarea id="fNotes" placeholder="Estado, detalles, etc.">${escapeHtml(it.notes)}</textarea>
+        </label>
+
+        <label class="field">
+          <span>Fotos</span>
+          <div class="photo-row" id="photoRow"></div>
+          <input type="file" id="fileInput" accept="image/*" multiple capture="environment" style="display:none">
+        </label>
+
+        <div class="confirm-actions" style="margin-top:8px;">
+          <button class="btn-ghost" id="cancelForm" type="button">Cancelar</button>
+          <button class="btn-accent" id="saveForm" type="button">${editing?'Guardar cambios':'Agregar'}</button>
+        </div>
+      </div>
+    </div>`;
+
+  fillSelect(document.getElementById('fCategorySel'), categories, 'Elegir categoría');
+  fillSelect(document.getElementById('fSizeSel'), sizes, 'Elegir talle');
+  document.getElementById('fCategorySel').value = it.category || '';
+  document.getElementById('fSizeSel').value = it.size || '';
+
+  renderPhotoRow();
+
+  document.getElementById('addCatBtn').onclick = ()=>{
+    const v = document.getElementById('newCat').value.trim();
+    if(!v) return;
+    if(!categories.includes(v)) categories.push(v);
+    persistCats(); refreshFilterSelects();
+    fillSelect(document.getElementById('fCategorySel'), categories, 'Elegir categoría');
+    document.getElementById('fCategorySel').value = v;
+    document.getElementById('newCat').value='';
+  };
+  document.getElementById('addSizeBtn').onclick = ()=>{
+    const v = document.getElementById('newSize').value.trim();
+    if(!v) return;
+    if(!sizes.includes(v)) sizes.push(v);
+    persistSizes(); refreshFilterSelects();
+    fillSelect(document.getElementById('fSizeSel'), sizes, 'Elegir talle');
+    document.getElementById('fSizeSel').value = v;
+    document.getElementById('newSize').value='';
+  };
+
+  document.getElementById('closeForm').onclick = closeModal;
+  document.getElementById('cancelForm').onclick = closeModal;
+  document.getElementById('ov').onclick = (ev)=>{ if(ev.target.id==='ov') closeModal(); };
+
+  document.getElementById('saveForm').onclick = ()=>{
+    const name = document.getElementById('fName').value.trim();
+    if(!name){ showToast('Poné un nombre para la prenda'); return; }
+    const data = {
+      id: editing ? it.id : uid(),
+      name,
+      category: document.getElementById('fCategorySel').value,
+      size: document.getElementById('fSizeSel').value,
+      price: document.getElementById('fPrice').value.trim(),
+      notes: document.getElementById('fNotes').value.trim(),
+      photos: formPhotos,
+      createdAt: editing ? it.createdAt : Date.now()
+    };
+    if(editing){
+      const idx = items.findIndex(x=>x.id===it.id);
+      items[idx] = data;
+    } else {
+      items.push(data);
+    }
+    persistItems();
+    closeModal();
+    renderAll();
+    showToast(editing?'Cambios guardados':'Prenda agregada');
+  };
+}
+
+function renderPhotoRow(){
+  const row = document.getElementById('photoRow');
+  row.innerHTML = formPhotos.map((p,i)=>`
+    <div class="photo-thumb">
+      <img src="${p}">
+      <button class="rm" data-rm="${i}" type="button">✕</button>
+    </div>`).join('') + `<button class="add-photo-btn" id="addPhotoBtn" type="button">+</button>`;
+
+  row.querySelectorAll('[data-rm]').forEach(b=>{
+    b.onclick = ()=>{ formPhotos.splice(+b.dataset.rm,1); renderPhotoRow(); };
+  });
+  document.getElementById('addPhotoBtn').onclick = ()=> document.getElementById('fileInput').click();
+}
+
+document.addEventListener('change', async (e)=>{
+  if(e.target.id === 'fileInput'){
+    const files = Array.from(e.target.files||[]);
+    for(const f of files){
+      try{
+        const compressed = await compressImage(f);
+        formPhotos.push(compressed);
+      }catch(err){ console.error(err); }
+    }
+    renderPhotoRow();
+    e.target.value = '';
+  }
+});
+
+/* ---------------- Delete confirmation ---------------- */
+function confirmDelete(id){
+  const it = items.find(x=>x.id===id);
+  if(!it) return;
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = `
+    <div class="overlay" id="ov">
+      <div class="sheet">
+        <div class="sheet-head"><h3>Eliminar prenda</h3></div>
+        <div class="confirm-box">
+          <p>¿Seguro que querés eliminar "<strong>${escapeHtml(it.name)}</strong>"? Esta acción no se puede deshacer.</p>
+          <div class="confirm-actions">
+            <button class="btn-ghost" id="cancelDel">Cancelar</button>
+            <button class="btn-danger" id="okDel">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('cancelDel').onclick = closeModal;
+  document.getElementById('ov').onclick = (ev)=>{ if(ev.target.id==='ov') closeModal(); };
+  document.getElementById('okDel').onclick = ()=>{
+    items = items.filter(x=>x.id!==id);
+    selectedIds.delete(id);
+    persistItems();
+    closeModal();
+    renderAll();
+    showToast('Prenda eliminada');
+  };
+}
+
+/* ---------------- Share selected ---------------- */
+document.getElementById('btnShare').onclick = async ()=>{
+  if(selectedIds.size===0) return;
+  const selectedItems = items.filter(i=>selectedIds.has(i.id));
+  const allPhotos = [];
+  selectedItems.forEach(it=>{
+    it.photos.forEach((p,idx)=> allPhotos.push({dataUrl:p, name: it.name.replace(/[^a-z0-9]+/gi,'_') + '_' + (idx+1) + '.jpg'}));
+  });
+  if(allPhotos.length === 0){
+    showToast('Las prendas seleccionadas no tienen fotos');
+    return;
+  }
+  const files = allPhotos.map(p=>dataURLtoFile(p.dataUrl, p.name));
+  const namesList = selectedItems.map(i=>`${i.name} (talle ${i.size||'—'})`).join(', ');
+
+  if(navigator.canShare && navigator.canShare({files})){
+    try{
+      await navigator.share({
+        files,
+        title:'Stock disponible',
+        text:`Te comparto: ${namesList}`
+      });
+      return;
+    }catch(err){
+      if(err.name === 'AbortError') return;
+      console.error(err);
+    }
+  }
+  // Fallback: no Web Share API con archivos disponible en este navegador
+  openFallbackShare(allPhotos, namesList);
+};
+
+function openFallbackShare(photos, namesList){
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = `
+    <div class="overlay" id="ov">
+      <div class="sheet">
+        <div class="sheet-head">
+          <h3>Compartir fotos</h3>
+          <button class="close" id="closeShare">✕</button>
+        </div>
+        <p style="font-size:.88rem;color:var(--ink-soft);margin-top:0">
+          Este navegador no permite compartir fotos directamente. Mantené presionada cada imagen para guardarla o compartirla.
+        </p>
+        <div class="photo-row">
+          ${photos.map(p=>`<div class="photo-thumb" style="width:100px;height:100px;"><img src="${p.dataUrl}"></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('closeShare').onclick = closeModal;
+  document.getElementById('ov').onclick = (ev)=>{ if(ev.target.id==='ov') closeModal(); };
+}
+
+/* ---------------- Init ---------------- */
+function renderAll(){
+  refreshFilterSelects();
+  renderCatalog();
+  renderAdmin();
+}
+renderAll();
+switchView('catalog');
+
+/* ---------------- PWA: registrar service worker ---------------- */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(err=>console.log('SW no registrado:', err));
+  });
+}
+</script>
+</body>
+</html>
