@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Ropita Stock</title>
+<title>Ropita Stock v12</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-512.png">
 <link rel="apple-touch-icon" href="icon-512.png">
@@ -46,16 +46,16 @@
   /* Bottom nav */
   nav.tabs{
     position:fixed;bottom:0;left:0;right:0;
-    display:flex;background:var(--card);
+    display:flex;gap:3px;background:var(--card);
     border-top:1px solid var(--line);
-    padding:6px 8px calc(6px + env(safe-area-inset-bottom));
-    z-index:10;
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom));
+    z-index:10;overflow-x:auto;overscroll-behavior-x:contain;
   }
   nav.tabs button{
-    flex:1;background:none;border:none;padding:8px 2px;
-    color:var(--ink-soft);font-size:.7rem;font-weight:600;
+    flex:0 0 64px;background:none;border:none;padding:7px 2px;
+    color:var(--ink-soft);font-size:.66rem;font-weight:600;
     display:flex;flex-direction:column;align-items:center;gap:3px;
-    border-radius:10px;
+    border-radius:10px;white-space:nowrap;
   }
   nav.tabs button .ic{font-size:1.25rem;}
   nav.tabs button.active{color:var(--accent);background:var(--accent-soft);}
@@ -280,6 +280,26 @@
   .sale-row .smeta{font-size:.74rem;color:var(--ink-soft);margin-top:2px;}
   .sale-row .sprice{font-size:.82rem;font-weight:700;color:var(--accent);white-space:nowrap;}
   .sale-row .sdel{background:none;border:none;color:var(--danger);font-size:1rem;padding:4px;}
+  .dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px;}
+  .dash-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px;min-width:0;}
+  .dash-card .big{font-size:1.12rem;font-weight:800;color:var(--accent);overflow-wrap:anywhere;}
+  .dash-card .small{font-size:.75rem;color:var(--ink-soft);margin-top:4px;line-height:1.35;}
+  .section-title{font-size:1rem;margin:18px 0 9px;}
+  .notice{background:var(--danger-soft);color:#813a2b;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:.85rem;line-height:1.4;}
+  .entity-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:9px;}
+  .entity-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;}
+  .entity-name{font-weight:800;overflow-wrap:anywhere;}
+  .entity-meta{font-size:.78rem;color:var(--ink-soft);margin-top:4px;line-height:1.4;}
+  .entity-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;}
+  .entity-actions button{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;color:var(--accent);font-weight:700;}
+  .entity-actions button.danger{color:var(--danger);}
+  .form-lines{display:flex;flex-direction:column;gap:8px;}
+  .form-line{display:grid;grid-template-columns:minmax(0,1fr) 90px 42px;gap:6px;align-items:center;}
+  .form-line select,.form-line input{min-width:0;width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:#fff;font:inherit;}
+  .form-line button{height:38px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--danger);}
+  .muted-note{font-size:.78rem;color:var(--ink-soft);line-height:1.4;margin:8px 0 12px;}
+  .tool-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 14px}.tool-buttons button,.cash-actions button{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;color:var(--accent);font-weight:700;font-size:.82rem}.cash-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cash-form-grid label{font-size:.78rem;color:var(--ink-soft);font-weight:700}.cash-form-grid input,.cash-form-grid select{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit;color:var(--ink);margin-top:4px}.cash-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.cash-row{display:flex;justify-content:space-between;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:7px}.cash-row .meta{font-size:.75rem;color:var(--ink-soft);margin-top:3px}.cash-positive{color:var(--accent);font-weight:800}.cash-negative{color:var(--danger);font-weight:800}.tool-input{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;font:inherit;background:#fff}.move-row{font-size:.8rem;background:#fff;border:1px solid var(--line);padding:9px;border-radius:9px;margin-bottom:6px}.move-row .muted-note{margin:3px 0 0}.order-actions button[data-prep],.order-actions button[data-ready]{background:var(--accent-soft);color:var(--accent)}
+  @media(max-width:360px){.dash-grid{gap:7px}.dash-card{padding:10px}.dash-card .big{font-size:1rem}.cash-form-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -291,9 +311,28 @@
 
 <main>
 
-  <div id="viewCatalog">
+  <div id="viewHome" class="hide">
+    <h2 style="font-size:1.1rem;margin-bottom:5px">Resumen del negocio</h2>
+    <p class="muted-note" id="dashPeriod">Resumen actualizado con los datos cargados en este celular.</p>
+    <div class="dash-grid">
+      <div class="dash-card"><div class="big" id="dashSales">$0</div><div class="small">Vendido este mes</div></div>
+      <div class="dash-card"><div class="big" id="dashExpenses">$0</div><div class="small">Gastos registrados este mes</div></div>
+      <div class="dash-card"><div class="big" id="dashProfit">—</div><div class="small">Ganancia estimada del mes*</div></div>
+      <div class="dash-card"><div class="big" id="dashDebt">$0</div><div class="small">Saldos pendientes de clientes</div></div>
+      <div class="dash-card"><div class="big" id="dashStock">0</div><div class="small">Unidades disponibles</div></div>
+      <div class="dash-card"><div class="big" id="dashOpenOrders">0</div><div class="small">Pedidos sin entregar</div></div>
+    </div>
+    <p class="muted-note">*La ganancia es una estimación: suma el margen de ventas con costo conocido y resta los gastos del mes. No reemplaza una contabilidad formal.</p>
+    <h3 class="section-title">Alertas de stock bajo</h3>
+    <div id="lowStockContent"></div>
+    <div class="empty hide" id="lowStockEmpty">No hay talles con 2 unidades o menos.</div>
+    <h3 class="section-title">Actividad reciente</h3>
+    <div id="dashRecent"></div>
+  </div>
+
+  <div id="viewCatalog" class="hide">
     <div class="filters">
-      <input type="text" id="fSearch" placeholder="Buscar por nombre...">
+      <input type="text" id="fSearch" placeholder="Buscar por nombre o código...">
       <select id="fCategory"><option value="">Todas las categorías</option></select>
       <select id="fSize"><option value="">Todos los talles</option></select>
     </div>
@@ -317,14 +356,28 @@
       <button id="btnCopySummary">📋 Copiar resumen</button>
     </div>
     <input type="file" id="restoreFileInput" accept="application/json,.json" style="display:none">
-    <div class="data-note">Hacé una copia de seguridad periódicamente. El catálogo web exportado es un archivo independiente que después tendrás que publicar en internet para obtener un enlace para tus clientas.</div>
+    <div class="data-note"><strong>Importante:</strong> tus datos se guardan en este navegador y dispositivo; no se sincronizan automáticamente con otros celulares. Exportá respaldos con frecuencia y guardalos fuera del teléfono. El catálogo web exportado es un archivo independiente que después tendrás que publicar en internet para obtener un enlace para tus clientas.</div>
+    <div class="tool-buttons">
+      <button id="btnRestock">📥 Ingresar mercadería</button>
+      <button id="btnStockHistory">📋 Historial de stock</button>
+      <button id="btnMakePost">📣 Crear publicación</button>
+      <button id="btnPrintLabels">🏷️ Imprimir etiquetas</button>
+      <button id="btnStocktake">🔎 Contar stock físico</button>
+      <button id="btnBusinessReports">📊 Ganancias e informes</button>
+      <button id="btnPromotionCalc">🏷️ Calcular promoción</button>
+      <button id="btnVariantView">🧺 Ver modelos y colores</button>
+    </div>
+    <div id="stocktakePanel" class="extra-panel hide"><h3>Conteos de stock físico</h3><p class="muted-note">Compará las unidades que hay realmente con las registradas. Al guardar, se ajusta el stock y queda un movimiento en el historial.</p><div id="stocktakeContent"></div></div>
+    <div id="businessReportsPanel" class="extra-panel hide"><h3>Ganancias e informes</h3><label class="field"><span>Mes a consultar</span><select id="reportMonth" class="tool-input"></select></label><div id="businessReportContent"></div><div class="extra-actions"><button id="btnExportReportCsv">⬇️ Descargar informe CSV</button></div></div>
+    <div id="variantViewPanel" class="extra-panel hide"><h3>Modelos, colores y talles</h3><p class="muted-note">Vista agrupada de consulta: agrupa productos con el mismo nombre y muestra sus colores/talles. No fusiona ni modifica fichas.</p><div id="variantViewContent"></div></div>
+    <div id="stockHistoryPanel" class="hide"><h3 class="section-title">Movimientos de stock</h3><div class="filters"><input class="tool-input" id="stockHistorySearch" placeholder="Buscar prenda, talle o motivo"></div><div id="stockHistoryContent"></div></div>
     <div class="settings-panel">
       <label for="whatsappNumber">WhatsApp del negocio (código de país + número, solo números)</label>
       <div class="settings-row"><input id="whatsappNumber" type="tel" inputmode="numeric" placeholder="Ej.: 5492920123456"><button class="btn btn-outline" id="saveShopSettings" type="button">Guardar</button></div>
       <div class="data-note" style="margin:8px 0 0">Se usa para los botones de consulta y pedido del catálogo. En Argentina suele comenzar con 549 y el número, sin +, espacios ni guiones.</div>
     </div>
     <div class="filters">
-      <input type="text" id="aSearch" placeholder="Buscar por nombre...">
+      <input type="text" id="aSearch" placeholder="Buscar por nombre o código...">
       <select id="aCategory"><option value="">Todas las categorías</option></select>
       <select id="aSize"><option value="">Todos los talles</option></select>
     </div>
@@ -379,16 +432,55 @@
     <div class="empty hide" id="expEmpty">Todavía no cargaste ningún gasto.</div>
   </div>
 
+  <div id="viewCash" class="hide">
+    <h2 style="font-size:1.1rem;margin-bottom:5px">Caja diaria</h2>
+    <p class="muted-note">Registrá cada cobro y pago real, con su medio de pago. Las ventas, cobros de pedidos, gastos y ferias nuevos se reflejan automáticamente en caja. Los movimientos viejos no se importan solos para evitar duplicar dinero; revisá los registros anteriores antes de cargarlos manualmente.</p>
+    <div class="dash-grid">
+      <div class="dash-card"><div class="big" id="cashTodayIn">$0</div><div class="small">Ingresos de hoy</div></div>
+      <div class="dash-card"><div class="big" id="cashTodayOut">$0</div><div class="small">Egresos de hoy</div></div>
+      <div class="dash-card"><div class="big" id="cashTodayNet">$0</div><div class="small">Balance de hoy</div></div>
+      <div class="dash-card"><div class="big" id="cashAllNet">$0</div><div class="small">Balance de todos los movimientos</div></div>
+    </div>
+    <div class="add-entry-row"><button class="btn btn-accent" id="btnAddCash">+ Registrar ingreso o egreso</button></div>
+    <div class="filters"><select id="cashTypeFilter"><option value="">Ingresos y egresos</option><option value="in">Solo ingresos</option><option value="out">Solo egresos</option></select><select id="cashMethodFilter"><option value="">Todos los medios de pago</option><option>Efectivo</option><option>Transferencia</option><option>Débito</option><option>Crédito</option><option>Billetera virtual</option><option>Otro</option></select></div>
+    <div id="cashContent"></div><div class="empty hide" id="cashEmpty">Todavía no registraste movimientos de caja.</div>
+  </div>
+
+  <div id="viewClients" class="hide">
+    <h2 style="font-size:1.1rem;margin-bottom:5px">Clientes y saldos</h2>
+    <p class="muted-note">La lista se arma con los clientes guardados en Pedidos. Los saldos se actualizan cuando registrás pagos o entregas.</p>
+    <div class="filters"><input type="text" id="clientSearch" placeholder="Buscar por nombre o teléfono..."></div>
+    <div id="clientsContent"></div>
+    <div class="empty hide" id="clientsEmpty">Todavía no hay clientes registrados. Al guardar pedidos con nombre y teléfono aparecerán acá.</div>
+  </div>
+
+  <div id="viewManagement" class="hide">
+    <h2 style="font-size:1.1rem;margin-bottom:5px">Proveedores y ferias</h2>
+    <div class="add-entry-row"><button class="btn btn-accent" id="btnAddSupplier">+ Agregar proveedor</button></div>
+    <h3 class="section-title">Mis proveedores</h3>
+    <div id="suppliersContent"></div>
+    <div class="empty hide" id="suppliersEmpty">Todavía no cargaste proveedores.</div>
+    <div class="add-entry-row" style="margin-top:18px"><button class="btn btn-accent" id="btnAddFair">+ Registrar feria / venta presencial</button></div>
+    <p class="muted-note">Al registrar una feria podés cargar las prendas vendidas por talle: el stock se descuenta y las ventas se agregan al historial. El costo de puesto/traslado queda registrado como gasto.</p>
+    <h3 class="section-title">Ferias registradas</h3>
+    <div id="fairsContent"></div>
+    <div class="empty hide" id="fairsEmpty">Todavía no registraste ferias.</div>
+  </div>
+
 </main>
 
 <button class="fab hide" id="fabAdd">+</button>
 
 <nav class="tabs">
-  <button id="tabCatalogBtn" class="active"><span class="ic">👀</span>Ver</button>
-  <button id="tabAdminBtn"><span class="ic">✏️</span>Administrar</button>
-  <button id="tabSalesBtn"><span class="ic">💰</span>Vendido</button>
+  <button id="tabHomeBtn" class="active"><span class="ic">🏠</span>Inicio</button>
+  <button id="tabCatalogBtn"><span class="ic">👀</span>Ver</button>
+  <button id="tabAdminBtn"><span class="ic">✏️</span>Stock</button>
+  <button id="tabSalesBtn"><span class="ic">💰</span>Ventas</button>
   <button id="tabOrdersBtn"><span class="ic">📦</span>Pedidos</button>
   <button id="tabExpensesBtn"><span class="ic">🧾</span>Gastos</button>
+  <button id="tabCashBtn"><span class="ic">💵</span>Caja</button>
+  <button id="tabClientsBtn"><span class="ic">👥</span>Clientes</button>
+  <button id="tabManagementBtn"><span class="ic">🏪</span>Compras</button>
 </nav>
 
 <div id="modalRoot"></div>
@@ -404,6 +496,12 @@ const LS_EXPENSES = 'ropita_expenses';
 const LS_EXP_CATS = 'ropita_exp_categories';
 const LS_ORDERS = 'ropita_orders';
 const LS_SETTINGS = 'ropita_settings';
+const LS_SUPPLIERS = 'ropita_suppliers';
+const LS_FAIRS = 'ropita_fairs';
+const LS_CASH = 'ropita_cash_movements';
+const LS_STOCK_MOVES = 'ropita_stock_moves';
+const LS_STOCKTAKES = 'ropita_stocktakes';
+const LS_PROMOTIONS = 'ropita_promotions';
 
 function load(key, fallback){
   try{
@@ -428,12 +526,26 @@ let expenses = load(LS_EXPENSES, []);
 let expCategories = load(LS_EXP_CATS, ['Mercadería','Envío','Insumos/Embalaje','Otros']);
 let orders = load(LS_ORDERS, []);
 let shopSettings = load(LS_SETTINGS, {whatsapp:''});
+let suppliers = load(LS_SUPPLIERS, []);
+let fairs = load(LS_FAIRS, []);
+let cashMovements = load(LS_CASH, []);
+let stockMoves = load(LS_STOCK_MOVES, []);
+let stocktakes = load(LS_STOCKTAKES, []);
+let promotions = load(LS_PROMOTIONS, []);
+if(!Array.isArray(suppliers)) suppliers = [];
+if(!Array.isArray(fairs)) fairs = [];
+if(!Array.isArray(cashMovements)) cashMovements = [];
+if(!Array.isArray(stockMoves)) stockMoves = [];
+if(!Array.isArray(stocktakes)) stocktakes = [];
+if(!Array.isArray(promotions)) promotions = [];
 if(!shopSettings || typeof shopSettings !== 'object') shopSettings = {whatsapp:''};
 
 /* Migración: prendas viejas tenían "size" único -> ahora usamos "variants":[{size,qty}] */
 let migrated = false;
 items.forEach(it=>{
   if(!Array.isArray(it.photos)) it.photos = [];
+  if(it.color === undefined) it.color = '';
+  if(it.code === undefined) it.code = '';
   if(it.cost === undefined) it.cost = '';
   if(!it.variants){
     it.variants = it.size ? [{size: it.size, qty: 1}] : [];
@@ -451,12 +563,19 @@ function persistExpenses(){ save(LS_EXPENSES, expenses); }
 function persistExpCats(){ save(LS_EXP_CATS, expCategories); }
 function persistOrders(){ save(LS_ORDERS, orders); }
 function persistSettings(){ save(LS_SETTINGS, shopSettings); }
+function persistSuppliers(){ save(LS_SUPPLIERS, suppliers); }
+function persistFairs(){ save(LS_FAIRS, fairs); }
+function persistCash(){ save(LS_CASH, cashMovements); }
+function persistStockMoves(){ save(LS_STOCK_MOVES, stockMoves); }
+function persistStocktakes(){ save(LS_STOCKTAKES, stocktakes); }
+function persistPromotions(){ save(LS_PROMOTIONS, promotions); }
 
 let selectedIds = new Set();
 let currentView = 'catalog'; // 'catalog' | 'admin'
 
 /* ---------------- Utilities ---------------- */
 function uid(){ return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function logStockMove(itemId,name,size,delta,reason){ if(!Number(delta)) return; stockMoves.push({id:uid(),date:Date.now(),itemId:itemId||'',name:name||'Prenda',size:String(size||''),delta:Number(delta),reason:reason||'Ajuste manual'}); if(stockMoves.length>5000) stockMoves=stockMoves.slice(-5000); persistStockMoves(); }
 
 function totalQty(it){ return it.variants.reduce((s,v)=>s+v.qty,0); }
 
@@ -519,7 +638,7 @@ function getFiltered(prefix, onlyInStock){
   const cat = document.getElementById(prefix==='f'?'fCategory':'aCategory').value;
   const size = document.getElementById(prefix==='f'?'fSize':'aSize').value;
   return items.filter(it=>{
-    if(search && !it.name.toLowerCase().includes(search)) return false;
+    if(search && !(it.name+' '+(it.color||'')+' '+(it.code||'')+' '+it.variants.map(v=>v.size).join(' ')).toLowerCase().includes(search)) return false;
     if(cat && it.category !== cat) return false;
     if(size && !it.variants.some(v=>v.size===size && v.qty>0)) return false;
     if(onlyInStock && totalQty(it) <= 0) return false;
@@ -550,7 +669,7 @@ function renderCatalog(){
       </div>
       <div class="info" data-open="${it.id}">
         <div class="name">${escapeHtml(it.name)}</div>
-        <div class="meta">${escapeHtml(it.category||'—')}</div>
+        <div class="meta">${escapeHtml(it.category||'—')}${it.color?' · '+escapeHtml(it.color):''}</div>
         <div class="sizes-line">${escapeHtml(sizesLine(it))}</div>
       </div>`;
     grid.appendChild(card);
@@ -587,7 +706,7 @@ function renderAdmin(){
       </div>
       <div class="info">
         <div class="name">${escapeHtml(it.name)}</div>
-        <div class="meta">${escapeHtml(it.category||'—')}</div>
+        <div class="meta">${escapeHtml(it.category||'—')}${it.color?' · '+escapeHtml(it.color):''}${it.code?' · Código '+escapeHtml(it.code):''}</div>
         ${soldOut?'<div class="soldout-tag">Sin stock</div>':''}
       </div>
       <div class="variant-list">${variantsHtml}</div>
@@ -600,26 +719,24 @@ function renderAdmin(){
 }
 
 /* ---------------- Tabs ---------------- */
+document.getElementById('tabHomeBtn').onclick = ()=>switchView('home');
 document.getElementById('tabCatalogBtn').onclick = ()=>switchView('catalog');
 document.getElementById('tabAdminBtn').onclick = ()=>switchView('admin');
 document.getElementById('tabSalesBtn').onclick = ()=>switchView('sales');
 document.getElementById('tabOrdersBtn').onclick = ()=>switchView('orders');
 document.getElementById('tabExpensesBtn').onclick = ()=>switchView('expenses');
+document.getElementById('tabCashBtn').onclick = ()=>switchView('cash');
+document.getElementById('tabClientsBtn').onclick = ()=>switchView('clients');
+document.getElementById('tabManagementBtn').onclick = ()=>switchView('management');
 function switchView(v){
   currentView = v;
-  document.getElementById('viewCatalog').classList.toggle('hide', v!=='catalog');
-  document.getElementById('viewAdmin').classList.toggle('hide', v!=='admin');
-  document.getElementById('viewSales').classList.toggle('hide', v!=='sales');
-  document.getElementById('viewOrders').classList.toggle('hide', v!=='orders');
-  document.getElementById('viewExpenses').classList.toggle('hide', v!=='expenses');
-  document.getElementById('tabCatalogBtn').classList.toggle('active', v==='catalog');
-  document.getElementById('tabAdminBtn').classList.toggle('active', v==='admin');
-  document.getElementById('tabSalesBtn').classList.toggle('active', v==='sales');
-  document.getElementById('tabOrdersBtn').classList.toggle('active', v==='orders');
-  document.getElementById('tabExpensesBtn').classList.toggle('active', v==='expenses');
+  const views = {home:'viewHome',catalog:'viewCatalog',admin:'viewAdmin',sales:'viewSales',orders:'viewOrders',expenses:'viewExpenses',cash:'viewCash',clients:'viewClients',management:'viewManagement'};
+  Object.entries(views).forEach(([key,id])=>document.getElementById(id).classList.toggle('hide',v!==key));
+  const tabs = {home:'tabHomeBtn',catalog:'tabCatalogBtn',admin:'tabAdminBtn',sales:'tabSalesBtn',orders:'tabOrdersBtn',expenses:'tabExpensesBtn',cash:'tabCashBtn',clients:'tabClientsBtn',management:'tabManagementBtn'};
+  Object.entries(tabs).forEach(([key,id])=>document.getElementById(id).classList.toggle('active',v===key));
   document.getElementById('fabAdd').classList.toggle('hide', v!=='admin');
-  const subs = {catalog:'Catálogo (solo ver)', admin:'Administrar stock', sales:'Historial de ventas', orders:'Pedidos, señas y saldos', expenses:'Registro de gastos'};
-  document.getElementById('headerSub').textContent = subs[v];
+  const subs = {home:'Resumen del negocio',catalog:'Catálogo (solo ver)',admin:'Administrar stock',sales:'Historial de ventas',orders:'Pedidos, señas y saldos',expenses:'Registro de gastos',cash:'Caja diaria',clients:'Clientes y cuentas pendientes',management:'Proveedores y ferias'};
+  document.getElementById('headerSub').textContent = subs[v] || 'Ropita Stock';
   renderAll();
 }
 
@@ -672,6 +789,7 @@ function openDetail(id){
           ${it.photos.length ? it.photos.map(p=>`<img src="${p}">`).join('') : '<div style="padding:40px 0;color:var(--ink-soft);text-align:center;width:100%">Sin fotos</div>'}
         </div>
         <div class="detail-row"><span class="k">Categoría</span><span class="v">${escapeHtml(it.category||'—')}</span></div>
+        ${it.color?`<div class="detail-row"><span class="k">Color/estampa</span><span class="v">${escapeHtml(it.color)}</span></div>`:''}
         <div class="detail-row"><span class="k">Talles disponibles</span><span class="v detail-sizes">${availableVariants.map(v=>`<span>${escapeHtml(v.size)} · ${v.qty}</span>`).join('')||'—'}</span></div>
         ${it.price ? `<div class="detail-row"><span class="k">Precio</span><span class="v">$${escapeHtml(it.price)}</span></div>` : ''}
         ${it.notes ? `<div class="detail-notes">${escapeHtml(it.notes)}</div>` : ''}
@@ -730,14 +848,31 @@ function openForm(id){
         </label>
 
         <label class="field">
+          <span>Código de producto (opcional, para buscar rápido)</span>
+          <input type="text" id="fCode" value="${escapeHtml(it.code || '')}" placeholder="Ej.: CJ-001">
+        </label>
+
+        <label class="field">
+          <span>Color o estampa (opcional)</span>
+          <input type="text" id="fColor" value="${escapeHtml(it.color || '')}" placeholder="Ej: rosa, dinosaurios, neutro">
+          <div class="muted-note">Las cantidades se controlan por talle. Si el mismo modelo viene en distintos colores o estampas, cargá cada color como una prenda separada; podés agregar varias fotos a cada una.</div>
+        </label>
+
+        <label class="field">
           <span>Precio de venta (opcional)</span>
           <input type="number" id="fPrice" min="0" step="0.01" value="${escapeHtml(it.price)}" placeholder="0">
         </label>
 
         <label class="field">
           <span>Costo de compra por unidad (opcional)</span>
-          <input type="number" id="fCost" min="0" step="0.01" value="${escapeHtml(it.cost ?? '')}" placeholder="Lo que te costó cada prenda">
+          <input type="number" id="fCost" min="0" step="0.01" value="${escapeHtml(it.purchaseCost ?? it.cost ?? '')}" placeholder="Lo que te costó cada prenda">
         </label>
+        <div class="extra-panel"><strong>Costos adicionales por unidad (opcionales)</strong><p class="muted-note">Se suman al costo de compra para estimar mejor la ganancia. Repartí el envío del proveedor entre las prendas del paquete.</p>
+          <label class="field"><span>Envío del proveedor por unidad</span><input type="number" id="fShippingCost" min="0" step="0.01" value="${escapeHtml(it.shippingCost ?? '')}" placeholder="0"></label>
+          <label class="field"><span>Bolsa, etiqueta y embalaje por unidad</span><input type="number" id="fPackagingCost" min="0" step="0.01" value="${escapeHtml(it.packagingCost ?? '')}" placeholder="0"></label>
+          <label class="field"><span>Otros costos por unidad</span><input type="number" id="fOtherCost" min="0" step="0.01" value="${escapeHtml(it.otherUnitCost ?? '')}" placeholder="0"></label>
+          <label class="field"><span>Comisión de cobro estimada (%)</span><input type="number" id="fFeePct" min="0" max="100" step="0.1" value="${escapeHtml(it.feePct ?? '')}" placeholder="0"></label>
+        </div>
 
         <label class="field">
           <span>Notas (opcional)</span>
@@ -797,8 +932,15 @@ function openForm(id){
       id: editing ? it.id : uid(),
       name,
       category: document.getElementById('fCategorySel').value,
+      color: document.getElementById('fColor').value.trim(),
+      code: document.getElementById('fCode').value.trim(),
       price: document.getElementById('fPrice').value.trim(),
-      cost: document.getElementById('fCost').value.trim(),
+      purchaseCost: document.getElementById('fCost').value.trim(),
+      shippingCost: document.getElementById('fShippingCost')?.value.trim() || '',
+      packagingCost: document.getElementById('fPackagingCost')?.value.trim() || '',
+      otherUnitCost: document.getElementById('fOtherCost')?.value.trim() || '',
+      feePct: document.getElementById('fFeePct')?.value.trim() || '',
+      cost: (document.getElementById('fCost').value.trim()==='' ? '' : (Number(document.getElementById('fCost').value)||0) + (Number(document.getElementById('fShippingCost')?.value)||0) + (Number(document.getElementById('fPackagingCost')?.value)||0) + (Number(document.getElementById('fOtherCost')?.value)||0)),
       notes: document.getElementById('fNotes').value.trim(),
       photos: formPhotos,
       variants,
@@ -806,9 +948,13 @@ function openForm(id){
     };
     if(editing){
       const idx = items.findIndex(x=>x.id===it.id);
+      const oldQty = new Map((items[idx].variants||[]).map(v=>[String(v.size),Number(v.qty)||0]));
+      const newQty = new Map(data.variants.map(v=>[String(v.size),Number(v.qty)||0]));
+      new Set([...oldQty.keys(),...newQty.keys()]).forEach(sz=>{const delta=(newQty.get(sz)||0)-(oldQty.get(sz)||0);if(delta)logStockMove(data.id,data.name,sz,delta,'Ajuste al editar prenda');});
       items[idx] = data;
     } else {
       items.push(data);
+      data.variants.forEach(v=>logStockMove(data.id,data.name,v.size,v.qty,'Stock inicial de prenda'));
     }
     persistItems();
     closeModal();
@@ -943,6 +1089,7 @@ function confirmSell(id, size){
   document.getElementById('ov').onclick = (ev)=>{ if(ev.target.id==='ov') closeModal(); };
   document.getElementById('okSell').onclick = ()=>{
     variant.qty = Math.max(0, variant.qty - 1);
+    logStockMove(it.id,it.name,size,-1,'Venta directa');
     persistItems();
     sales.push({
       id: uid(),
@@ -1177,7 +1324,7 @@ function expRowHtml(x){
       <div class="sthumb">🧾</div>
       <div class="sinfo">
         <div class="sname">${escapeHtml(x.desc)}</div>
-        <div class="smeta">${escapeHtml(x.category||'—')} · ${dateStr}</div>
+        <div class="smeta">${escapeHtml(x.category||'—')}${x.supplierId?' · '+escapeHtml((suppliers.find(p=>p.id===x.supplierId)||{}).name||'Proveedor'):''} · ${dateStr}</div>
       </div>
       <div class="sprice">${moneyFmt(x.amount) || '$0'}</div>
       <button class="ed" style="border:none;background:none;color:var(--accent);padding:4px;font-size:.85rem;" data-editexp="${x.id}" title="Editar">✏️</button>
@@ -1243,7 +1390,7 @@ document.getElementById('expContent').addEventListener('click', e=>{
 function openExpenseForm(id){
   const editing = !!id;
   const x = editing ? expenses.find(e=>e.id===id) : {desc:'', amount:'', category:'', date: Date.now()};
-  const dateInputVal = new Date(x.date).toISOString().slice(0,10);
+  const dateInputVal = localDateInputValue(x.date);
 
   const root = document.getElementById('modalRoot');
   root.innerHTML = `
@@ -1274,6 +1421,11 @@ function openExpenseForm(id){
         </label>
 
         <label class="field">
+          <span>Proveedor (opcional)</span>
+          <select id="eSupplierSel"><option value="">Sin proveedor asociado</option>${suppliers.map(p=>`<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join('')}</select>
+        </label>
+
+        <label class="field">
           <span>Fecha</span>
           <input type="date" id="eDate" value="${dateInputVal}">
         </label>
@@ -1287,6 +1439,7 @@ function openExpenseForm(id){
 
   fillSelect(document.getElementById('eCategorySel'), expCategories, 'Elegir categoría');
   document.getElementById('eCategorySel').value = x.category || '';
+  document.getElementById('eSupplierSel').value = x.supplierId || '';
 
   document.getElementById('addExpCatBtn').onclick = ()=>{
     const v = document.getElementById('newExpCat').value.trim();
@@ -1313,6 +1466,7 @@ function openExpenseForm(id){
       desc,
       amount: Number(amount),
       category: document.getElementById('eCategorySel').value,
+      supplierId: document.getElementById('eSupplierSel').value,
       date: dateVal ? new Date(dateVal + 'T12:00:00').getTime() : Date.now()
     };
     if(editing){
@@ -1359,15 +1513,15 @@ function confirmDeleteExpense(id){
 /* ---------------- Respaldo y catálogo web ---------------- */
 function exportBackup(){
   const backup = {
-    app: 'Ropita Stock', schemaVersion: 3, exportedAt: new Date().toISOString(),
-    items, categories, sizes, sales, expenses, expCategories, orders, shopSettings
+    app: 'Ropita Stock', schemaVersion: 10, exportedAt: new Date().toISOString(),
+    items, categories, sizes, sales, expenses, expCategories, orders, shopSettings, suppliers, fairs, cashMovements, stockMoves, stocktakes, promotions
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'ropita-stock-respaldo-' + new Date().toISOString().slice(0,10) + '.json';
+  a.href = url; a.download = 'ropita-stock-respaldo-' + localDateInputValue() + '.json';
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 1000);
-  showToast('Respaldo exportado');
+  showToast('Respaldo exportado correctamente');
 }
 
 function restoreBackupFile(file){
@@ -1377,16 +1531,43 @@ function restoreBackupFile(file){
     let data;
     try { data = JSON.parse(reader.result); } catch(e){ showToast('El archivo no es un JSON válido'); return; }
     const required = ['items','categories','sizes','sales','expenses','expCategories'];
-    if(!data || !required.every(k=>Array.isArray(data[k]))){ showToast('El respaldo no tiene el formato esperado'); return; }
-    if(!confirm('Restaurar reemplazará los datos actuales de Ropita Stock. ¿Ya guardaste un respaldo de lo que tenés ahora?')) return;
+    const optionalArrays = ['orders','suppliers','fairs','cashMovements','stockMoves','stocktakes','promotions'];
+    if(!data || data.app && data.app!=='Ropita Stock' || !required.every(k=>Array.isArray(data[k])) || optionalArrays.some(k=>data[k]!==undefined&&!Array.isArray(data[k]))){ showToast('El respaldo no tiene el formato esperado'); return; }
+    const objectArrays = [...required.filter(k=>!['categories','sizes','expCategories'].includes(k)), ...optionalArrays];
+    for(const key of objectArrays){
+      if(!Array.isArray(data[key])) continue;
+      if(data[key].some(x=>!x || typeof x!=='object' || Array.isArray(x))){ showToast('El respaldo contiene registros dañados en '+key+'. No se modificó nada.'); return; }
+    }
+    for(const it of data.items){
+      if(!Array.isArray(it.variants) && !(it.size!==undefined && it.size!==null)){ showToast('Hay una prenda sin variantes válidas. No se modificó nada.'); return; }
+      const variants=Array.isArray(it.variants)?it.variants:[{size:it.size,qty:1}];
+      if(variants.some(v=>!v || typeof v!=='object' || v.size===undefined || !Number.isFinite(Number(v.qty)) || Number(v.qty)<0)){ showToast('Hay talles o cantidades inválidas en el respaldo. No se modificó nada.'); return; }
+      if(it.photos!==undefined && !Array.isArray(it.photos)){ showToast('Hay una lista de fotos dañada en el respaldo. No se modificó nada.'); return; }
+    }
+    if(!confirm(`Vas a restaurar un respaldo${data.schemaVersion?' (versión '+data.schemaVersion+')':''}.
+Prendas: ${data.items.length} · Ventas: ${data.sales.length} · Gastos: ${data.expenses.length} · Pedidos: ${(data.orders||[]).length}.
+
+Antes de reemplazar los datos, la app descargará una copia de lo que tenés ahora. Continuar?`)) return;
+    // Descarga automática de la situación actual para que el usuario pueda volver atrás.
+    try {
+      const current={app:'Ropita Stock',schemaVersion:10,exportedAt:new Date().toISOString(),items,categories,sizes,sales,expenses,expCategories,orders,shopSettings,suppliers,fairs,cashMovements,stockMoves,stocktakes,promotions};
+      const blob=new Blob([JSON.stringify(current,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ropita-stock-antes-de-restaurar-'+localDateInputValue()+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+    } catch(e){ showToast('No se pudo descargar el respaldo previo. Se canceló la restauración por seguridad.'); return; }
     const restoredOrders = Array.isArray(data.orders) ? data.orders : [];
     const restoredSettings = data.shopSettings && typeof data.shopSettings === 'object' ? data.shopSettings : {whatsapp:''};
-    const keys = [LS_ITEMS,LS_CATS,LS_SIZES,LS_SALES,LS_EXPENSES,LS_EXP_CATS,LS_ORDERS,LS_SETTINGS];
-    const values = [data.items,data.categories,data.sizes,data.sales,data.expenses,data.expCategories,restoredOrders,restoredSettings];
+    const restoredSuppliers = Array.isArray(data.suppliers) ? data.suppliers : [];
+    const restoredFairs = Array.isArray(data.fairs) ? data.fairs : [];
+    const restoredCash = Array.isArray(data.cashMovements) ? data.cashMovements : [];
+    const restoredMoves = Array.isArray(data.stockMoves) ? data.stockMoves : [];
+    const restoredStocktakes = Array.isArray(data.stocktakes) ? data.stocktakes : [];
+    const restoredPromotions = Array.isArray(data.promotions) ? data.promotions : [];
+    const keys = [LS_ITEMS,LS_CATS,LS_SIZES,LS_SALES,LS_EXPENSES,LS_EXP_CATS,LS_ORDERS,LS_SETTINGS,LS_SUPPLIERS,LS_FAIRS,LS_CASH,LS_STOCK_MOVES,LS_STOCKTAKES,LS_PROMOTIONS];
+    const values = [data.items,data.categories,data.sizes,data.sales,data.expenses,data.expCategories,restoredOrders,restoredSettings,restoredSuppliers,restoredFairs,restoredCash,restoredMoves,restoredStocktakes,restoredPromotions];
     const old = keys.map(k=>localStorage.getItem(k));
     try {
       keys.forEach((k,i)=>localStorage.setItem(k, JSON.stringify(values[i])));
-      items=data.items; categories=data.categories; sizes=data.sizes; sales=data.sales; expenses=data.expenses; expCategories=data.expCategories; orders=restoredOrders; shopSettings=restoredSettings;
+      items=data.items.map(it=>{const x={...it};if(!Array.isArray(x.variants))x.variants=x.size?[{size:x.size,qty:1}]:[];delete x.size;if(!Array.isArray(x.photos))x.photos=[];if(x.color===undefined)x.color='';if(x.code===undefined)x.code='';if(x.cost===undefined)x.cost='';return x;}); categories=data.categories; sizes=data.sizes; sales=data.sales; expenses=data.expenses; expCategories=data.expCategories; orders=restoredOrders; shopSettings=restoredSettings; suppliers=restoredSuppliers; fairs=restoredFairs; cashMovements=restoredCash; stockMoves=restoredMoves; stocktakes=restoredStocktakes; promotions=restoredPromotions;
+      document.getElementById('whatsappNumber').value=shopSettings.whatsapp||'';
       selectedIds.clear(); renderAll(); showToast('Respaldo restaurado correctamente');
     } catch(e){
       keys.forEach((k,i)=>{ try { if(old[i]===null) localStorage.removeItem(k); else localStorage.setItem(k,old[i]); } catch(_){} });
@@ -1399,21 +1580,21 @@ function restoreBackupFile(file){
 
 function exportPublicCatalog(){
   const publicItems = items.filter(it=>totalQty(it)>0).map(it=>({
-    name:it.name, category:it.category||'', price:it.price||'',
+    name:it.name, category:it.category||'', color:it.color||'', code:it.code||'', price:it.price||'',
     variants:(it.variants||[]).filter(v=>v.qty>0).map(v=>({size:v.size,qty:v.qty})),
     photos:Array.isArray(it.photos)?it.photos:[]
   }));
   const safeData = JSON.stringify(publicItems).replace(/</g,'\\u003c');
   const waNumber = String((shopSettings && shopSettings.whatsapp) || '').replace(/\D/g,'');
   const safeWa = JSON.stringify(waNumber);
-  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#4f7a6b"><title>Catálogo | Creciendo juntos</title><style>*{box-sizing:border-box}body{margin:0;background:#faf7f2;color:#2e2a26;font-family:system-ui,-apple-system,sans-serif}header{padding:22px 16px;background:#4f7a6b;color:white}header h1{margin:0;font-size:1.5rem}header p{margin:5px 0 0;font-size:.9rem}.wrap{max-width:900px;margin:auto;padding:16px}.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}.filters input,.filters select{min-width:0;width:100%;padding:11px;border:1px solid #e7e1d8;border-radius:10px;background:white;font:inherit}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px}.card{background:white;border:1px solid #e7e1d8;border-radius:14px;overflow:hidden}.photo{aspect-ratio:1/1;background:#e4efe9}.photo img{width:100%;height:100%;object-fit:cover}.info{padding:10px}.name{font-weight:750}.cat,.sizes{font-size:.82rem;color:#6f6a63;margin-top:4px}.price{color:#4f7a6b;font-weight:800;margin-top:8px}.empty{padding:25px;text-align:center;color:#6f6a63}.controls{display:grid;grid-template-columns:1fr 75px;gap:6px;margin-top:10px}.controls select,.controls input{width:100%;min-width:0;padding:9px;border:1px solid #e7e1d8;border-radius:8px;background:#fff;font:inherit}.actions{display:flex;gap:7px;margin-top:8px}.actions button,.send{flex:1;border:0;border-radius:9px;padding:10px;background:#4f7a6b;color:#fff;font-weight:700;font:inherit}.actions .outline{background:#e4efe9;color:#315d4e}.send{width:100%;margin:14px 0}.hint{font-size:.82rem;color:#6f6a63}.cart-count{font-weight:800}@media(max-width:360px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}</style></head><body><header><h1>Creciendo juntos</h1><p>Ropita para los peques · Catálogo disponible</p></header><main class="wrap"><div class="filters"><input id="q" placeholder="Buscar prenda..."><select id="cat"><option value="">Todas las categorías</option></select></div><p class="hint">Elegí talle y cantidad para consultar o enviar tu pedido por WhatsApp. La disponibilidad se confirma con el negocio.</p><div id="grid" class="grid"></div><div id="empty" class="empty" hidden>No hay prendas disponibles con ese filtro.</div><button class="send" id="sendOrder">Enviar pedido por WhatsApp (<span id="cartCount">0</span>)</button><p class="hint">Los pedidos quedan sujetos a confirmación de stock y precio.</p></main><script>const products=${safeData};const waNumber=${safeWa};const q=document.getElementById('q'),cat=document.getElementById('cat'),grid=document.getElementById('grid'),empty=document.getElementById('empty');const cart={};[...new Set(products.map(p=>p.category).filter(Boolean))].sort().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;cat.appendChild(o)});function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function render(){const list=products.filter(p=>(!q.value||p.name.toLowerCase().includes(q.value.toLowerCase()))&&(!cat.value||p.category===cat.value));grid.innerHTML=list.map((p,idx)=>'<article class="card"><div class="photo">'+(p.photos[0]?'<img src="'+p.photos[0]+'" alt="'+esc(p.name)+'">':'')+'</div><div class="info"><div class="name">'+esc(p.name)+'</div><div class="cat">'+esc(p.category)+'</div><div class="sizes">'+p.variants.map(v=>esc(v.size)+' ('+v.qty+')').join(' · ')+'</div>'+(p.price?'<div class="price">$'+esc(p.price)+'</div>':'')+'<div class="controls"><select id="size-'+idx+'">'+p.variants.map(v=>'<option value="'+esc(v.size)+'">Talle '+esc(v.size)+' · '+v.qty+' disp.</option>').join('')+'</select><input id="qty-'+idx+'" type="number" min="1" max="'+Math.max(...p.variants.map(v=>v.qty))+'" value="1" aria-label="Cantidad"></div><div class="actions"><button class="outline" data-consult="'+idx+'">Consultar</button><button data-add="'+idx+'">Agregar</button></div></div></article>').join('');empty.hidden=list.length>0}function makeMessage(items,kind){return 'Hola! Soy una clienta y quiero '+(kind==='consulta'?'consultar por estas prendas:':'hacer este pedido:')+'\\n\\n'+items.map(x=>'• '+x.name+' — talle '+x.size+' x '+x.qty+(x.price?' — $'+x.price+' c/u':'')).join('\\n')+'\\n\\n¿Me confirmás disponibilidad y total?'}function send(items,kind){if(!items.length){alert('Primero elegí una prenda y talle.');return}const msg=makeMessage(items,kind);if(!waNumber){navigator.clipboard?.writeText(msg).then(()=>alert('Falta configurar el WhatsApp del negocio en Ropita Stock. Copié el mensaje si el navegador lo permitió.')).catch(()=>alert(msg));return}location.href='https://wa.me/'+waNumber+'?text='+encodeURIComponent(msg)}function selectedFromCard(idx){const p=products.filter(x=>(!q.value||x.name.toLowerCase().includes(q.value.toLowerCase()))&&(!cat.value||x.category===cat.value))[idx];if(!p)return null;const size=document.getElementById('size-'+idx).value;const qty=Math.max(1,Number(document.getElementById('qty-'+idx).value)||1);const variant=p.variants.find(v=>v.size===size);if(!variant||qty>variant.qty){alert('La cantidad supera el stock mostrado. Consultanos para confirmar disponibilidad.');return null}return {name:p.name,size,qty,price:p.price||'',stock:variant.qty}}grid.addEventListener('click',e=>{const a=e.target.closest('[data-add]');const c=e.target.closest('[data-consult]');if(a){const x=selectedFromCard(Number(a.dataset.add));if(x){const key=x.name+'|'+x.size;const combined=(cart[key]?.qty||0)+x.qty;if(combined>x.stock){alert('La cantidad acumulada supera el stock mostrado. Reducí la cantidad o consultanos.');return}cart[key]=cart[key]?{...cart[key],qty:combined}:x;document.getElementById('cartCount').textContent=Object.values(cart).reduce((n,x)=>n+x.qty,0);alert('Agregado al pedido')}}if(c){const x=selectedFromCard(Number(c.dataset.consult));if(x)send([x],'consulta')}});document.getElementById('sendOrder').onclick=()=>send(Object.values(cart),'pedido');q.addEventListener('input',render);cat.addEventListener('change',render);render();<\/script></body></html>`;
+  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#4f7a6b"><title>Catálogo | Creciendo juntos</title><style>*{box-sizing:border-box}body{margin:0;background:#faf7f2;color:#2e2a26;font-family:system-ui,-apple-system,sans-serif}header{padding:22px 16px;background:#4f7a6b;color:white}header h1{margin:0;font-size:1.5rem}header p{margin:5px 0 0;font-size:.9rem}.wrap{max-width:900px;margin:auto;padding:16px}.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}.filters input,.filters select{min-width:0;width:100%;padding:11px;border:1px solid #e7e1d8;border-radius:10px;background:white;font:inherit}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px}.card{background:white;border:1px solid #e7e1d8;border-radius:14px;overflow:hidden}.photo{aspect-ratio:1/1;background:#e4efe9}.photo img{width:100%;height:100%;object-fit:cover}.info{padding:10px}.name{font-weight:750}.cat,.sizes{font-size:.82rem;color:#6f6a63;margin-top:4px}.price{color:#4f7a6b;font-weight:800;margin-top:8px}.empty{padding:25px;text-align:center;color:#6f6a63}.controls{display:grid;grid-template-columns:1fr 75px;gap:6px;margin-top:10px}.controls select,.controls input{width:100%;min-width:0;padding:9px;border:1px solid #e7e1d8;border-radius:8px;background:#fff;font:inherit}.actions{display:flex;gap:7px;margin-top:8px}.actions button,.send{flex:1;border:0;border-radius:9px;padding:10px;background:#4f7a6b;color:#fff;font-weight:700;font:inherit}.actions .outline{background:#e4efe9;color:#315d4e}.send{width:100%;margin:14px 0}.hint{font-size:.82rem;color:#6f6a63}.cart-count{font-weight:800}@media(max-width:360px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}</style></head><body><header><h1>Creciendo juntos</h1><p>Ropita para los peques · Catálogo disponible</p></header><main class="wrap"><div class="filters"><input id="q" placeholder="Buscar prenda..."><select id="cat"><option value="">Todas las categorías</option></select></div><p class="hint">Elegí talle y cantidad para consultar o enviar tu pedido por WhatsApp. La disponibilidad se confirma con el negocio.</p><div id="grid" class="grid"></div><div id="empty" class="empty" hidden>No hay prendas disponibles con ese filtro.</div><button class="send" id="sendOrder">Enviar pedido por WhatsApp (<span id="cartCount">0</span>)</button><p class="hint">Los pedidos quedan sujetos a confirmación de stock y precio.</p></main><script>const products=${safeData};const waNumber=${safeWa};const q=document.getElementById('q'),cat=document.getElementById('cat'),grid=document.getElementById('grid'),empty=document.getElementById('empty');const cart={};[...new Set(products.map(p=>p.category).filter(Boolean))].sort().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;cat.appendChild(o)});function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function render(){const list=products.filter(p=>(!q.value||(p.name+' '+(p.color||'')).toLowerCase().includes(q.value.toLowerCase()))&&(!cat.value||p.category===cat.value));grid.innerHTML=list.map((p,idx)=>'<article class="card"><div class="photo">'+(p.photos[0]?'<img src="'+p.photos[0]+'" alt="'+esc(p.name)+'">':'')+'</div><div class="info"><div class="name">'+esc(p.name)+'</div><div class="cat">'+esc(p.category)+(p.color?' · '+esc(p.color):'')+'</div><div class="sizes">'+p.variants.map(v=>esc(v.size)+' ('+v.qty+')').join(' · ')+'</div>'+(p.price?'<div class="price">$'+esc(p.price)+'</div>':'')+'<div class="controls"><select id="size-'+idx+'">'+p.variants.map(v=>'<option value="'+esc(v.size)+'">Talle '+esc(v.size)+' · '+v.qty+' disp.</option>').join('')+'</select><input id="qty-'+idx+'" type="number" min="1" max="'+Math.max(...p.variants.map(v=>v.qty))+'" value="1" aria-label="Cantidad"></div><div class="actions"><button class="outline" data-consult="'+idx+'">Consultar</button><button data-add="'+idx+'">Agregar</button></div></div></article>').join('');empty.hidden=list.length>0}function makeMessage(items,kind){return 'Hola! Soy una clienta y quiero '+(kind==='consulta'?'consultar por estas prendas:':'hacer este pedido:')+'\\n\\n'+items.map(x=>'• '+x.name+' — talle '+x.size+' x '+x.qty+(x.price?' — $'+x.price+' c/u':'')).join('\\n')+'\\n\\n¿Me confirmás disponibilidad y total?'}function send(items,kind){if(!items.length){alert('Primero elegí una prenda y talle.');return}const msg=makeMessage(items,kind);if(!waNumber){navigator.clipboard?.writeText(msg).then(()=>alert('Falta configurar el WhatsApp del negocio en Ropita Stock. Copié el mensaje si el navegador lo permitió.')).catch(()=>alert(msg));return}location.href='https://wa.me/'+waNumber+'?text='+encodeURIComponent(msg)}function selectedFromCard(idx){const p=products.filter(x=>(!q.value||(x.name+' '+(x.color||'')).toLowerCase().includes(q.value.toLowerCase()))&&(!cat.value||x.category===cat.value))[idx];if(!p)return null;const size=document.getElementById('size-'+idx).value;const qty=Math.max(1,Number(document.getElementById('qty-'+idx).value)||1);const variant=p.variants.find(v=>v.size===size);if(!variant||qty>variant.qty){alert('La cantidad supera el stock mostrado. Consultanos para confirmar disponibilidad.');return null}return {name:p.name,size,qty,price:p.price||'',stock:variant.qty}}grid.addEventListener('click',e=>{const a=e.target.closest('[data-add]');const c=e.target.closest('[data-consult]');if(a){const x=selectedFromCard(Number(a.dataset.add));if(x){const key=x.name+'|'+x.size;const combined=(cart[key]?.qty||0)+x.qty;if(combined>x.stock){alert('La cantidad acumulada supera el stock mostrado. Reducí la cantidad o consultanos.');return}cart[key]=cart[key]?{...cart[key],qty:combined}:x;document.getElementById('cartCount').textContent=Object.values(cart).reduce((n,x)=>n+x.qty,0);alert('Agregado al pedido')}}if(c){const x=selectedFromCard(Number(c.dataset.consult));if(x)send([x],'consulta')}});document.getElementById('sendOrder').onclick=()=>send(Object.values(cart),'pedido');q.addEventListener('input',render);cat.addEventListener('change',render);render();<\/script></body></html>`;
   const blob = new Blob([html], {type:'text/html;charset=utf-8'});
   const url = URL.createObjectURL(blob); const a=document.createElement('a');
   a.href=url; a.download='catalogo-creciendo-juntos.html'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 1000);
   showToast('Catálogo web exportado');
 }
 
-document.getElementById('btnBackup').onclick = exportBackup;
+document.getElementById('btnBackup').onclick = ()=>exportBackup();
 document.getElementById('btnRestore').onclick = ()=>document.getElementById('restoreFileInput').click();
 document.getElementById('restoreFileInput').addEventListener('change',e=>{restoreBackupFile(e.target.files&&e.target.files[0]);e.target.value='';});
 document.getElementById('btnExportCatalog').onclick = exportPublicCatalog;
@@ -1427,7 +1608,8 @@ document.getElementById('btnCopySummary').onclick = async ()=>{
 /* ---------------- Pedidos, señas y saldos ---------------- */
 function moneyNum(v){ return Math.max(0, Number(v)||0); }
 function orderBalance(o){ return Math.max(0, moneyNum(o.total)-moneyNum(o.paid)); }
-function orderStatusLabel(o){ return ({pending:'Pendiente',confirmed:'Confirmado',delivered:'Entregado',cancelled:'Cancelado'})[o.status] || 'Pendiente'; }
+function orderStatusLabel(o){ return ({pending:'Pendiente',confirmed:'Confirmado',preparing:'En preparación',ready:'Listo para entregar',delivered:'Entregado',cancelled:'Cancelado'})[o.status] || 'Pendiente'; }
+function setOrderPrepStatus(id,status){const o=orders.find(x=>x.id===id);if(!o||['delivered','cancelled'].includes(o.status))return;o.status=status;persistOrders();renderOrders();showToast(status==='ready'?'Pedido listo para entregar':'Pedido marcado en preparación');}
 function renderOrders(){
   const active=orders.filter(o=>o.status!=='cancelled' && (!['delivered'].includes(o.status) || orderBalance(o)>0));
   document.getElementById('ordersPendingCount').textContent=active.length;
@@ -1440,7 +1622,7 @@ function renderOrders(){
     const balance=orderBalance(o);
     const showPayment=o.status!=='cancelled' && balance>0;
     const canFinish=o.status!=='delivered' && o.status!=='cancelled';
-    return `<article class="order-card"><div class="order-head"><div><div class="order-name">${escapeHtml(o.customer||'Cliente sin nombre')}</div><div class="order-meta">Pedido ${date}${o.phone?' · '+escapeHtml(o.phone):''}</div></div><span class="order-status ${o.status==='cancelled'?'cancelled':''}">${orderStatusLabel(o)}</span></div><div class="order-meta">${lines}</div><div class="detail-row"><span class="k">Total</span><span class="v">${moneyFmt(o.total)}</span></div><div class="detail-row"><span class="k">Pagado / seña</span><span class="v">${moneyFmt(o.paid)}</span></div><div class="detail-row"><span class="k">Saldo pendiente</span><span class="v" style="color:${balance>0?'var(--danger)':'var(--accent)'}">${moneyFmt(balance)}</span></div>${o.notes?`<div class="order-meta">${escapeHtml(o.notes)}</div>`:''}<div class="order-actions">${showPayment?`<button data-orderpay="${o.id}">Registrar pago</button>`:''}${canFinish?`<button data-orderdone="${o.id}">Marcar entregado</button><button data-ordercancel="${o.id}">Cancelar y devolver stock</button>`:''}${o.phone?`<button data-orderwa="${o.id}">Abrir WhatsApp</button>`:''}</div></article>`;
+    return `<article class="order-card"><div class="order-head"><div><div class="order-name">${escapeHtml(o.customer||'Cliente sin nombre')}</div><div class="order-meta">Pedido ${date}${o.phone?' · '+escapeHtml(o.phone):''}</div></div><span class="order-status ${o.status==='cancelled'?'cancelled':''}">${orderStatusLabel(o)}</span></div><div class="order-meta">${lines}</div><div class="detail-row"><span class="k">Total</span><span class="v">${moneyFmt(o.total)}</span></div><div class="detail-row"><span class="k">Pagado / seña</span><span class="v">${moneyFmt(o.paid)}</span></div><div class="detail-row"><span class="k">Saldo pendiente</span><span class="v" style="color:${balance>0?'var(--danger)':'var(--accent)'}">${moneyFmt(balance)}</span></div>${o.notes?`<div class="order-meta">${escapeHtml(o.notes)}</div>`:''}<div class="order-actions">${showPayment?`<button data-orderpay="${o.id}">Registrar pago</button>`:''}${canFinish?`${o.status!=='preparing'&&o.status!=='ready'?`<button data-prep="${o.id}">Preparar pedido</button>`:''}${o.status!=='ready'?`<button data-ready="${o.id}">Listo para entregar</button>`:''}<button data-orderdone="${o.id}">Marcar entregado</button><button data-ordercancel="${o.id}">Cancelar y devolver stock</button>`:''}${o.phone?`<button data-orderwa="${o.id}">Abrir WhatsApp</button>`:''}</div></article>`;
   }).join('');
 }
 function addOrderLineRow(){
@@ -1470,7 +1652,7 @@ function openOrderForm(){
     const rows=[...document.querySelectorAll('#orderLines .order-line')];
     if(!customer){showToast('Ingresá el nombre de la clienta');return;}
     const lines=[];
-    for(const row of rows){const itemId=row.querySelector('.order-product').value,size=row.querySelector('.order-size').value,qty=Math.floor(Number(row.querySelector('.order-qty').value));const it=items.find(x=>x.id===itemId),v=it?.variants.find(x=>x.size===size);if(!it||!v||!Number.isFinite(qty)||qty<1){showToast('Completá prenda, talle y cantidad en cada línea');return;}if(v.qty<qty){showToast(`Stock insuficiente de ${it.name} talle ${size}`);return;}lines.push({itemId:it.id,name:it.name,category:it.category||'',size,qty,unitPrice:moneyNum(it.price),cost:it.cost!==''&&it.cost!=null?moneyNum(it.cost):null,photo:it.photos?.[0]||null});}
+    for(const row of rows){const itemId=row.querySelector('.order-product').value,size=row.querySelector('.order-size').value,qty=Math.floor(Number(row.querySelector('.order-qty').value));const it=items.find(x=>x.id===itemId),v=it?.variants.find(x=>x.size===size);if(!it||!v||!Number.isFinite(qty)||qty<1){showToast('Completá prenda, talle y cantidad en cada línea');return;}if(v.qty<qty){showToast(`Stock insuficiente de ${it.name} talle ${size}`);return;}lines.push({itemId:it.id,name:it.name,category:it.category||'',size,qty,unitPrice:moneyNum(it.price),cost:it.cost!==''&&it.cost!=null?moneyNum(it.cost):null,feePct:moneyNum(it.feePct),photo:it.photos?.[0]||null});}
     if(!lines.length){showToast('Agregá al menos una prenda');return;}
     const calculated=lines.reduce((n,l)=>n+l.unitPrice*l.qty,0);const total=document.getElementById('orderTotal').value.trim()===''?calculated:moneyNum(document.getElementById('orderTotal').value);const paid=moneyNum(document.getElementById('orderPaid').value);
     if(paid>total){showToast('La seña no puede superar el total');return;}
@@ -1478,18 +1660,214 @@ function openOrderForm(){
     const requested=new Map();
     for(const l of lines){const key=l.itemId+'|'+l.size;requested.set(key,(requested.get(key)||0)+l.qty);}
     for(const [key,qty] of requested){const [itemId,size]=key.split('|');const it=items.find(x=>x.id===itemId),v=it?.variants.find(x=>x.size===size);if(!v||v.qty<qty){showToast('Stock insuficiente al sumar las prendas repetidas. Revisá las cantidades.');return;}}
-    for(const [key,qty] of requested){const [itemId,size]=key.split('|');items.find(x=>x.id===itemId).variants.find(x=>x.size===size).qty-=qty;}
+    for(const [key,qty] of requested){const [itemId,size]=key.split('|');const it=items.find(x=>x.id===itemId);it.variants.find(x=>x.size===size).qty-=qty;logStockMove(itemId,it.name,size,-qty,'Reserva de pedido');}
     const order={id:uid(),customer,phone,lines,total,paid,status:'confirmed',notes:document.getElementById('orderNotes').value.trim(),createdAt:Date.now(),payments:paid?[{amount:paid,date:Date.now(),note:'Seña / pago inicial'}]:[]};
     orders.push(order);persistItems();persistOrders();closeModal();renderAll();showToast('Pedido guardado y stock reservado');
   };
 }
 function registerOrderPayment(id){const o=orders.find(x=>x.id===id);if(!o||o.status==='cancelled')return;const remaining=orderBalance(o);if(remaining<=0){showToast('Este pedido ya está pago');return;}const raw=prompt(`Saldo pendiente: ${moneyFmt(remaining)}. ¿Cuánto pagó la clienta?`,String(remaining));if(raw===null)return;const amount=Number(raw);if(!Number.isFinite(amount)||amount<=0||amount>remaining){showToast('Ingresá un monto mayor a cero y no superior al saldo');return;}const note=prompt('Concepto del pago (opcional):','Pago');o.paid=moneyNum(o.paid)+amount;o.payments=Array.isArray(o.payments)?o.payments:[];o.payments.push({amount,date:Date.now(),note:note||'Pago'});persistOrders();renderOrders();showToast('Pago registrado');}
-function deliverOrder(id){const o=orders.find(x=>x.id===id);if(!o||['delivered','cancelled'].includes(o.status))return;if(orderBalance(o)>0&&!confirm(`Queda un saldo de ${moneyFmt(orderBalance(o))}. ¿Marcar igualmente como entregado?`))return;if(!confirm('¿Confirmás la entrega? Se registrará la venta en el historial.'))return;o.status='delivered';o.deliveredAt=Date.now();const baseTotal=(o.lines||[]).reduce((n,l)=>n+(moneyNum(l.unitPrice)*l.qty),0);const factor=baseTotal>0?moneyNum(o.total)/baseTotal:1;(o.lines||[]).forEach(l=>{const effectivePrice=moneyNum(l.unitPrice)*factor;for(let i=0;i<l.qty;i++)sales.push({id:uid(),itemId:l.itemId,name:l.name,category:l.category,size:l.size,price:Math.round(effectivePrice*100)/100,cost:l.cost,photo:l.photo,soldAt:o.deliveredAt,orderId:o.id});});persistOrders();persistSales();renderAll();showToast('Entrega registrada en ventas');}
-function cancelOrder(id){const o=orders.find(x=>x.id===id);if(!o||['delivered','cancelled'].includes(o.status))return;if(!confirm('¿Cancelar el pedido y devolver al stock todas las unidades reservadas? Los pagos registrados quedarán en el historial del pedido.'))return;(o.lines||[]).forEach(l=>{const it=items.find(x=>x.id===l.itemId);const v=it?.variants.find(x=>x.size===l.size);if(v)v.qty+=l.qty;});o.status='cancelled';o.cancelledAt=Date.now();persistItems();persistOrders();renderAll();showToast('Pedido cancelado y stock devuelto');}
+function deliverOrder(id){const o=orders.find(x=>x.id===id);if(!o||['delivered','cancelled'].includes(o.status))return;if(orderBalance(o)>0&&!confirm(`Queda un saldo de ${moneyFmt(orderBalance(o))}. ¿Marcar igualmente como entregado?`))return;if(!confirm('¿Confirmás la entrega? Se registrará la venta en el historial.'))return;o.status='delivered';o.deliveredAt=Date.now();const baseTotal=(o.lines||[]).reduce((n,l)=>n+(moneyNum(l.unitPrice)*l.qty),0);const factor=baseTotal>0?moneyNum(o.total)/baseTotal:1;(o.lines||[]).forEach(l=>{const effectivePrice=moneyNum(l.unitPrice)*factor;for(let i=0;i<l.qty;i++)sales.push({id:uid(),itemId:l.itemId,name:l.name,category:l.category,size:l.size,price:Math.round(effectivePrice*100)/100,cost:(l.cost===null||l.cost===undefined?null:moneyNum(l.cost)+Math.round((effectivePrice*moneyNum(l.feePct)/100)*100)/100),photo:l.photo,soldAt:o.deliveredAt,orderId:o.id});});persistOrders();persistSales();renderAll();showToast('Entrega registrada en ventas');}
+function cancelOrder(id){const o=orders.find(x=>x.id===id);if(!o||['delivered','cancelled'].includes(o.status))return;if(!confirm('¿Cancelar el pedido y devolver al stock todas las unidades reservadas? Los pagos registrados quedarán en el historial del pedido.'))return;(o.lines||[]).forEach(l=>{const it=items.find(x=>x.id===l.itemId);const v=it?.variants.find(x=>x.size===l.size);if(v){v.qty+=l.qty;logStockMove(l.itemId,it.name,l.size,l.qty,'Devolución por pedido cancelado');}});o.status='cancelled';o.cancelledAt=Date.now();persistItems();persistOrders();renderAll();showToast('Pedido cancelado y stock devuelto');}
 function openOrderWhatsApp(id){const o=orders.find(x=>x.id===id);if(!o)return;const number=String(o.phone||shopSettings.whatsapp||'').replace(/\D/g,'');if(!number){showToast('Este pedido no tiene número de WhatsApp');return;}const msg=`Hola ${o.customer}, te escribo por tu pedido:\n${o.lines.map(l=>`• ${l.name} talle ${l.size} x ${l.qty}`).join('\n')}\nTotal: ${moneyFmt(o.total)}\nPagado: ${moneyFmt(o.paid)}\nSaldo: ${moneyFmt(orderBalance(o))}`;window.open('https://wa.me/'+number+'?text='+encodeURIComponent(msg),'_blank');}
-document.getElementById('btnAddOrder').onclick=openOrderForm;
-document.getElementById('ordersContent').addEventListener('click',e=>{const pay=e.target.closest('[data-orderpay]'),done=e.target.closest('[data-orderdone]'),cancel=e.target.closest('[data-ordercancel]'),wa=e.target.closest('[data-orderwa]');if(pay)registerOrderPayment(pay.dataset.orderpay);else if(done)deliverOrder(done.dataset.orderdone);else if(cancel)cancelOrder(cancel.dataset.ordercancel);else if(wa)openOrderWhatsApp(wa.dataset.orderwa);});
+document.getElementById('btnAddOrder').onclick=()=>openOrderForm();
+document.getElementById('ordersContent').addEventListener('click',e=>{const pay=e.target.closest('[data-orderpay]'),done=e.target.closest('[data-orderdone]'),cancel=e.target.closest('[data-ordercancel]'),wa=e.target.closest('[data-orderwa]'),prep=e.target.closest('[data-prep]'),ready=e.target.closest('[data-ready]');if(pay)registerOrderPayment(pay.dataset.orderpay);else if(done)deliverOrder(done.dataset.orderdone);else if(cancel)cancelOrder(cancel.dataset.ordercancel);else if(wa)openOrderWhatsApp(wa.dataset.orderwa);else if(prep)setOrderPrepStatus(prep.dataset.prep,'preparing');else if(ready)setOrderPrepStatus(ready.dataset.ready,'ready');});
 document.getElementById('saveShopSettings').onclick=()=>{shopSettings.whatsapp=String(document.getElementById('whatsappNumber').value||'').replace(/\D/g,'');persistSettings();showToast('WhatsApp del negocio guardado');};
+
+/* ---------------- Inicio: resumen y alertas ---------------- */
+function localDateInputValue(ts=Date.now()){const d=new Date(ts);const pad=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
+function isStockPurchaseExpense(x){const category=String(x?.category||'').trim().toLowerCase();const desc=String(x?.desc||'').trim().toLowerCase();return /^(mercader[ií]a|compra de mercader[ií]a|prendas para reventa|compra de ropa)$/.test(category)||/(compra de ropa|prendas para reventa|compra de mercader[ií]a)/.test(desc);}
+function monthSales(ts){ return monthKey(ts)===monthKey(Date.now());}
+function renderDashboard(){
+  const monthSalesRows=sales.filter(x=>monthSales(x.soldAt||x.date));
+  const monthExpenseRows=expenses.filter(x=>monthSales(x.date));
+  const sold=monthSalesRows.reduce((n,x)=>n+(Number(x.price)||0),0);
+  const spent=monthExpenseRows.reduce((n,x)=>n+(Number(x.amount)||0),0);
+  const operatingSpent=monthExpenseRows.filter(x=>!isStockPurchaseExpense(x)).reduce((n,x)=>n+(Number(x.amount)||0),0);
+  const withCost=monthSalesRows.filter(x=>x.cost!==undefined&&x.cost!==null&&x.cost!==''&&Number.isFinite(Number(x.cost)));
+  const gross=withCost.reduce((n,x)=>n+(Number(x.price)||0)-(Number(x.cost)||0),0);
+  const profit=monthSalesRows.length===0 ? -operatingSpent : (withCost.length===monthSalesRows.length ? gross-operatingSpent : null);
+  const debtOrders=orders.filter(o=>o.status!=='cancelled');
+  const debtOrderTotal=debtOrders.reduce((n,o)=>n+orderBalance(o),0);
+  const debtDirectSales=sales.filter(x=>!x.orderId&&!x.fairId&&Number(x.balance)>0).reduce((n,x)=>n+Number(x.balance||0),0);
+  const debt=debtOrderTotal+debtDirectSales;
+  document.getElementById('dashSales').textContent=moneyFmt(sold)||'$0';
+  document.getElementById('dashExpenses').textContent=moneyFmt(spent)||'$0';
+  document.getElementById('dashProfit').textContent=profit===null?'Incompleta':(moneyFmt(profit)||'$0');
+  document.getElementById('dashDebt').textContent=moneyFmt(debt)||'$0';
+  document.getElementById('dashStock').textContent=items.reduce((n,it)=>n+totalQty(it),0);
+  document.getElementById('dashOpenOrders').textContent=orders.filter(o=>!['delivered','cancelled'].includes(o.status)).length;
+  const low=[];
+  items.forEach(it=>(it.variants||[]).forEach(v=>{if(Number(v.qty)<=2)low.push({item:it,variant:v});}));
+  const lowBox=document.getElementById('lowStockContent');
+  document.getElementById('lowStockEmpty').classList.toggle('hide',low.length>0);
+  lowBox.innerHTML=low.slice(0,30).map(x=>`<div class="entity-card"><div class="entity-head"><div><div class="entity-name">${escapeHtml(x.item.name)}</div><div class="entity-meta">${escapeHtml(x.item.color||x.item.category||'')} · Talle ${escapeHtml(x.variant.size)}</div></div><strong style="color:${x.variant.qty<=0?'var(--danger)':'var(--accent)'}">${x.variant.qty} u.</strong></div></div>`).join('');
+  const recent=[...sales].sort((a,b)=>(b.soldAt||0)-(a.soldAt||0)).slice(0,4);
+  document.getElementById('dashRecent').innerHTML=recent.length?recent.map(x=>`<div class="sale-row"><div class="sthumb">${x.photo?`<img src="${x.photo}" alt="">`:'👕'}</div><div class="sinfo"><div class="sname">${escapeHtml(x.name)}</div><div class="smeta">Talle ${escapeHtml(x.size)} · ${new Date(x.soldAt).toLocaleDateString('es-AR')}</div></div><div class="sprice">${moneyFmt(x.price)||'$0'}</div></div>`).join(''):'<div class="muted-note">Todavía no hay ventas registradas.</div>';
+}
+
+/* ---------------- Clientes: resumen de pedidos y saldos ---------------- */
+function normalizedPhone(v){return String(v||'').replace(/\D/g,'');}
+function customerKey(o){return normalizedPhone(o.phone)||String(o.customer||'').trim().toLowerCase();}
+function renderClients(){
+  const q=(document.getElementById('clientSearch').value||'').trim().toLowerCase();
+  const groups=new Map();
+  orders.filter(o=>o.status!=='cancelled').forEach(o=>{
+    const key=customerKey(o); if(!key)return;
+    if(!groups.has(key))groups.set(key,{name:o.customer||'Cliente sin nombre',phone:o.phone||'',orders:[],balance:0,total:0,paid:0});
+    const c=groups.get(key); if(!c.phone&&o.phone)c.phone=o.phone; if(c.name==='Cliente sin nombre'&&o.customer)c.name=o.customer;
+    c.orders.push(o);c.balance+=orderBalance(o);c.total+=moneyNum(o.total);c.paid+=moneyNum(o.paid);
+  });
+  sales.filter(x=>!x.orderId&&!x.fairId&&(String(x.customer||'').trim()||String(x.phone||'').trim())).forEach(s=>{
+    const key=normalizedPhone(s.phone)||String(s.customer||'').trim().toLowerCase();if(!key)return;
+    if(!groups.has(key))groups.set(key,{name:s.customer||'Cliente sin nombre',phone:s.phone||'',orders:[],balance:0,total:0,paid:0,directSales:[]});
+    const c=groups.get(key);if(!c.phone&&s.phone)c.phone=s.phone;if(!c.directSales)c.directSales=[];c.directSales.push(s);c.balance+=Math.max(0,Number(s.balance)||0);c.total+=moneyNum(s.price);c.paid+=moneyNum(s.paid);
+  });
+  const list=[...groups.values()].filter(c=>!q||(c.name+' '+c.phone).toLowerCase().includes(q)).sort((a,b)=>b.balance-a.balance);
+  document.getElementById('clientsEmpty').classList.toggle('hide',list.length>0);
+  document.getElementById('clientsContent').innerHTML=list.map(c=>`<div class="entity-card"><div class="entity-head"><div><div class="entity-name">${escapeHtml(c.name)}</div><div class="entity-meta">${escapeHtml(c.phone||'Sin teléfono')} · ${c.orders.length} pedido(s)${c.directSales?.length?' · '+c.directSales.length+' venta(s) directa(s)':''}</div></div><strong style="color:${c.balance>0?'var(--danger)':'var(--accent)'}">Saldo ${moneyFmt(c.balance)||'$0'}</strong></div><div class="entity-meta">Total registrado: ${moneyFmt(c.total)||'$0'} · Pagado: ${moneyFmt(c.paid)||'$0'}</div><div class="entity-actions">${c.phone?`<button data-clientwa="${escapeHtml(c.phone)}" data-clientname="${escapeHtml(c.name)}" data-clientbalance="${c.balance}">Enviar recordatorio por WhatsApp</button>`:''}${c.orders.length?`<button data-clientorders="${escapeHtml(customerKey(c.orders[0]))}">Ver pedidos</button>`:''}</div></div>`).join('');
+}
+document.getElementById('clientSearch').addEventListener('input',renderClients);
+document.getElementById('clientsContent').addEventListener('click',e=>{
+  const wa=e.target.closest('[data-clientwa]');
+  if(wa){const num=normalizedPhone(wa.dataset.clientwa);const bal=Number(wa.dataset.clientbalance)||0;const msg=bal>0?`Hola ${wa.dataset.clientname}, ¿cómo estás? Te escribo para recordarte que queda un saldo pendiente de ${moneyFmt(bal)} de tu pedido. Cualquier cosa, avisame 😊`:`Hola ${wa.dataset.clientname}, ¿cómo estás? Te escribo por tus pedidos de Creciendo juntos 😊`;window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg),'_blank');return;}
+  const view=e.target.closest('[data-clientorders]');if(view){switchView('orders');}
+});
+
+/* ---------------- Proveedores ---------------- */
+function renderSuppliers(){
+  document.getElementById('suppliersEmpty').classList.toggle('hide',suppliers.length>0);
+  document.getElementById('suppliersContent').innerHTML=[...suppliers].sort((a,b)=>a.name.localeCompare(b.name)).map(p=>{
+    const related=expenses.filter(x=>x.supplierId===p.id).reduce((n,x)=>n+moneyNum(x.amount),0);
+    return `<div class="entity-card"><div class="entity-head"><div><div class="entity-name">${escapeHtml(p.name)}</div><div class="entity-meta">${escapeHtml(p.phone||'Sin contacto')}${p.notes?' · '+escapeHtml(p.notes):''}</div></div><strong>${moneyFmt(related)||'$0'}</strong></div><div class="entity-meta">Gastos vinculados registrados</div><div class="entity-actions"><button data-supplier-exp="${escapeHtml(p.id)}">Ver gastos</button><button class="danger" data-supplier-del="${escapeHtml(p.id)}">Eliminar proveedor</button></div></div>`;
+  }).join('');
+}
+function openSupplierForm(){
+  const root=document.getElementById('modalRoot');root.innerHTML=`<div class="overlay" id="supplierOverlay"><div class="sheet"><div class="sheet-head"><h3>Agregar proveedor</h3><button class="close" id="closeSupplier">✕</button></div><label class="field"><span>Nombre / comercio</span><input id="supplierName" type="text" placeholder="Ej: Distribuidora infantil"></label><label class="field"><span>Teléfono o WhatsApp (opcional)</span><input id="supplierPhone" type="tel" placeholder="Número de contacto"></label><label class="field"><span>Notas (opcional)</span><textarea id="supplierNotes" placeholder="Lista de precios, días de entrega..."></textarea></label><div class="confirm-actions"><button class="btn-ghost" id="cancelSupplier">Cancelar</button><button class="btn-accent" id="saveSupplier">Guardar proveedor</button></div></div></div>`;
+  const close=()=>closeModal();document.getElementById('closeSupplier').onclick=close;document.getElementById('cancelSupplier').onclick=close;document.getElementById('supplierOverlay').onclick=e=>{if(e.target.id==='supplierOverlay')close()};
+  document.getElementById('saveSupplier').onclick=()=>{const name=document.getElementById('supplierName').value.trim();if(!name){showToast('Ingresá el nombre del proveedor');return;}suppliers.push({id:uid(),name,phone:document.getElementById('supplierPhone').value.trim(),notes:document.getElementById('supplierNotes').value.trim(),createdAt:Date.now()});persistSuppliers();closeModal();renderAll();showToast('Proveedor guardado');};
+}
+document.getElementById('btnAddSupplier').onclick=openSupplierForm;
+document.getElementById('suppliersContent').addEventListener('click',e=>{
+  const del=e.target.closest('[data-supplier-del]');if(del){const p=suppliers.find(x=>x.id===del.dataset.supplierDel);if(!p)return;if(!confirm(`¿Eliminar el proveedor ${p.name}? Los gastos vinculados conservarán sus datos, pero dejarán de aparecer asociados.`))return;suppliers=suppliers.filter(x=>x.id!==p.id);persistSuppliers();renderAll();return;}
+  const exp=e.target.closest('[data-supplier-exp]');if(exp){switchView('expenses');document.getElementById('expModeList').click();}
+});
+
+/* ---------------- Ferias y ventas presenciales ---------------- */
+function addFairLine(){
+  const holder=document.getElementById('fairLines');if(!holder)return;
+  const row=document.createElement('div');row.className='form-line fair-line';
+  row.innerHTML=`<select class="fair-product"><option value="">Prenda</option>${items.filter(it=>totalQty(it)>0).map(it=>`<option value="${escapeHtml(it.id)}">${escapeHtml(it.name)}</option>`).join('')}</select><input class="fair-qty" type="number" min="1" value="1" aria-label="Cantidad"><button type="button" class="fair-remove">✕</button><select class="fair-size" style="grid-column:1 / 3"><option value="">Elegí talle</option></select><input class="fair-price" type="number" min="0" step="0.01" placeholder="Precio unitario" style="grid-column:1 / 3">`;
+  holder.appendChild(row);const product=row.querySelector('.fair-product'),size=row.querySelector('.fair-size'),qty=row.querySelector('.fair-qty'),price=row.querySelector('.fair-price');
+  function updateSizes(){const it=items.find(x=>x.id===product.value);size.innerHTML='<option value="">Elegí talle</option>'+(it?it.variants.filter(v=>v.qty>0).map(v=>`<option value="${escapeHtml(v.size)}" data-stock="${v.qty}">${escapeHtml(v.size)} · ${v.qty} disponibles</option>`).join(''):'');if(it&&it.price)price.value=it.price;}
+  product.addEventListener('change',updateSizes);size.addEventListener('change',()=>{qty.max=size.selectedOptions[0]?.dataset.stock||1;});row.querySelector('.fair-remove').onclick=()=>row.remove();
+}
+function openFairForm(){
+  const root=document.getElementById('modalRoot');root.innerHTML=`<div class="overlay" id="fairOverlay"><div class="sheet"><div class="sheet-head"><h3>Registrar feria / venta presencial</h3><button class="close" id="closeFair">✕</button></div><label class="field"><span>Nombre o lugar</span><input id="fairPlace" type="text" placeholder="Ej: Feria del barrio"></label><label class="field"><span>Fecha</span><input id="fairDate" type="date" value="${localDateInputValue()}"></label><label class="field"><span>Costo de puesto / traslado</span><input id="fairCost" type="number" min="0" step="0.01" value="0"></label><label class="field"><span>Medio de cobro de las ventas</span><select id="fairPayMethod" class="tool-input"><option>Efectivo</option><option>Transferencia</option><option>Débito</option><option>Crédito</option><option>Billetera virtual</option><option>Otro</option></select></label><div class="field"><span>Prendas vendidas en la feria</span><div class="form-lines" id="fairLines"></div><button class="btn btn-outline" id="addFairLine" type="button" style="width:100%;margin-top:8px">+ Agregar prenda vendida</button></div><label class="field"><span>Notas</span><textarea id="fairNotes" placeholder="Qué funcionó, qué llevar la próxima vez..."></textarea></label><p class="muted-note">Al guardar, se descontará el stock y cada prenda quedará en el historial de ventas. Revisá las cantidades antes de confirmar.</p><div class="confirm-actions"><button class="btn-ghost" id="cancelFair">Cancelar</button><button class="btn-accent" id="saveFair">Guardar feria</button></div></div></div>`;
+  const close=()=>closeModal();document.getElementById('closeFair').onclick=close;document.getElementById('cancelFair').onclick=close;document.getElementById('fairOverlay').onclick=e=>{if(e.target.id==='fairOverlay')close()};document.getElementById('addFairLine').onclick=addFairLine;addFairLine();
+  document.getElementById('saveFair').onclick=()=>{
+    const place=document.getElementById('fairPlace').value.trim();if(!place){showToast('Ingresá el lugar o nombre de la feria');return;}
+    const dateVal=document.getElementById('fairDate').value;const date=dateVal?new Date(dateVal+'T12:00:00').getTime():Date.now();const cost=moneyNum(document.getElementById('fairCost').value);
+    const rows=[...document.querySelectorAll('#fairLines .fair-line')];const lines=[];
+    for(const row of rows){const itemId=row.querySelector('.fair-product').value,size=row.querySelector('.fair-size').value,qty=Math.floor(Number(row.querySelector('.fair-qty').value)),price=Number(row.querySelector('.fair-price').value);const it=items.find(x=>x.id===itemId),v=it?.variants.find(x=>x.size===size);if(!itemId&&!size)continue;if(!it||!v||!Number.isFinite(qty)||qty<1||!Number.isFinite(price)||price<0){showToast('Completá prenda, talle, cantidad y precio en cada línea');return;}lines.push({itemId,name:it.name,category:it.category||'',color:it.color||'',size,qty,price,cost:it.cost!==''&&it.cost!=null?moneyNum(it.cost):null,feePct:moneyNum(it.feePct),photo:it.photos?.[0]||null});}
+    if(!lines.length){showToast('Cargá al menos una prenda vendida');return;}
+    const requested=new Map();lines.forEach(l=>{const k=l.itemId+'|'+l.size;requested.set(k,(requested.get(k)||0)+l.qty)});
+    for(const [k,q] of requested){const [id,size]=k.split('|');const v=items.find(it=>it.id===id)?.variants.find(x=>x.size===size);if(!v||v.qty<q){showToast('No alcanza el stock para las cantidades cargadas');return;}}
+    const fairId=uid();for(const [k,q] of requested){const [id,size]=k.split('|');const it=items.find(it=>it.id===id);it.variants.find(x=>x.size===size).qty-=q;logStockMove(id,it.name,size,-q,'Venta en feria');}
+    const soldAt=date;lines.forEach(l=>{for(let i=0;i<l.qty;i++)sales.push({id:uid(),itemId:l.itemId,name:l.name,category:l.category,size:l.size,price:l.price,cost:(l.cost===null||l.cost===undefined?null:moneyNum(l.cost)+Math.round((l.price*moneyNum(l.feePct)/100)*100)/100),photo:l.photo,soldAt,fairId});});
+    const salesTotal=lines.reduce((n,l)=>n+l.price*l.qty,0);const fair={id:fairId,place,date,cost,salesTotal,lines,notes:document.getElementById('fairNotes').value.trim(),createdAt:Date.now()};fairs.push(fair);
+    if(cost>0)expenses.push({id:uid(),desc:'Feria: '+place,amount:cost,category:'Feria',date,fairId});
+    persistItems();persistSales();persistFairs();persistExpenses();closeModal();renderAll();showToast('Feria guardada y stock actualizado');
+  };
+}
+document.getElementById('btnAddFair').onclick=()=>openFairForm();
+function renderFairs(){
+  const list=[...fairs].sort((a,b)=>(b.date||0)-(a.date||0));document.getElementById('fairsEmpty').classList.toggle('hide',list.length>0);
+  document.getElementById('fairsContent').innerHTML=list.map(f=>`<div class="entity-card"><div class="entity-head"><div><div class="entity-name">${escapeHtml(f.place)}</div><div class="entity-meta">${new Date(f.date).toLocaleDateString('es-AR')} · ${(f.lines||[]).reduce((n,l)=>n+l.qty,0)} prendas vendidas</div></div><strong>${moneyFmt(f.salesTotal)||'$0'}</strong></div><div class="entity-meta">Costo: ${moneyFmt(f.cost)||'$0'} · Resultado antes del costo de las prendas: ${moneyFmt((Number(f.salesTotal)||0)-(Number(f.cost)||0))||'$0'}</div>${f.notes?`<div class="entity-meta">${escapeHtml(f.notes)}</div>`:''}<div class="entity-actions"><button data-fair-sales="${escapeHtml(f.id)}">Ver ventas registradas</button></div></div>`).join('');
+}
+document.getElementById('fairsContent').addEventListener('click',e=>{const b=e.target.closest('[data-fair-sales]');if(b){switchView('sales');document.getElementById('salesModeList').click();}});
+
+
+/* ---------------- Caja diaria: movimientos reales de dinero ---------------- */
+function cashDateKey(ts){const d=new Date(Number(ts)||Date.now());return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function renderCash(){
+  if(!document.getElementById('cashContent'))return;
+  const today=cashDateKey(Date.now());const todayRows=cashMovements.filter(x=>cashDateKey(x.date)===today);
+  const sum=(arr,type)=>arr.filter(x=>x.type===type).reduce((n,x)=>n+(Number(x.amount)||0),0);
+  const todayIn=sum(todayRows,'in'),todayOut=sum(todayRows,'out');
+  document.getElementById('cashTodayIn').textContent=moneyFmt(todayIn)||'$0';document.getElementById('cashTodayOut').textContent=moneyFmt(todayOut)||'$0';document.getElementById('cashTodayNet').textContent=moneyFmt(todayIn-todayOut)||'$0';
+  document.getElementById('cashAllNet').textContent=moneyFmt(sum(cashMovements,'in')-sum(cashMovements,'out'))||'$0';
+  const tf=document.getElementById('cashTypeFilter')?.value||'',mf=document.getElementById('cashMethodFilter')?.value||'';
+  const list=[...cashMovements].filter(x=>(!tf||x.type===tf)&&(!mf||x.method===mf)).sort((a,b)=>Number(b.date)-Number(a.date));
+  document.getElementById('cashEmpty').classList.toggle('hide',list.length>0);
+  document.getElementById('cashContent').innerHTML=list.map(x=>`<div class="cash-row"><div><strong>${escapeHtml(x.description|| (x.type==='in'?'Ingreso':'Egreso'))}</strong><div class="meta">${new Date(x.date).toLocaleString('es-AR',{dateStyle:'short',timeStyle:'short'})} · ${escapeHtml(x.method||'Sin medio')} · ${x.type==='in'?'Ingreso':'Egreso'}</div></div><div style="text-align:right"><div class="${x.type==='in'?'cash-positive':'cash-negative'}">${x.type==='in'?'+':'−'}${moneyFmt(x.amount)}</div><button class="sdel" data-cashdel="${x.id}" title="Eliminar movimiento">✕</button></div></div>`).join('');
+}
+function openCashForm(){const root=document.getElementById('modalRoot');root.innerHTML=`<div class="overlay" id="cashOverlay"><div class="sheet"><div class="sheet-head"><h3>Movimiento de caja</h3><button class="close" id="cashClose">✕</button></div><div class="cash-form-grid"><label>Tipo<select id="cashType"><option value="in">Ingreso</option><option value="out">Egreso</option></select></label><label>Medio de pago<select id="cashMethod"><option>Efectivo</option><option>Transferencia</option><option>Débito</option><option>Crédito</option><option>Billetera virtual</option><option>Otro</option></select></label><label style="grid-column:1/-1">Descripción<input id="cashDesc" placeholder="Ej.: cobro pedido, compra de tela"></label><label>Monto ($)<input id="cashAmount" type="number" min="0.01" step="0.01" placeholder="0"></label><label>Fecha y hora<input id="cashDate" type="datetime-local" value="${new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16)}"></label></div><p class="muted-note">Las ventas cobradas, las señas/cobros de pedidos y los gastos pagados se reflejan automáticamente. Usá esta pantalla para otros movimientos que todavía no estén registrados. Eliminar un movimiento vinculado no borra la venta ni el gasto.</p><div class="confirm-actions"><button class="btn-ghost" id="cashCancel">Cancelar</button><button class="btn-accent" id="cashSave">Guardar movimiento</button></div></div></div>`;
+ const close=()=>closeModal();document.getElementById('cashClose').onclick=close;document.getElementById('cashCancel').onclick=close;document.getElementById('cashOverlay').onclick=e=>{if(e.target.id==='cashOverlay')close()};document.getElementById('cashSave').onclick=()=>{const description=document.getElementById('cashDesc').value.trim(),amount=Number(document.getElementById('cashAmount').value),dateValue=document.getElementById('cashDate').value;if(!description){showToast('Escribí el concepto del movimiento');return;}if(!Number.isFinite(amount)||amount<=0){showToast('Ingresá un monto mayor que cero');return;}const date=dateValue?new Date(dateValue).getTime():Date.now();if(!Number.isFinite(date)){showToast('Revisá la fecha');return;}cashMovements.push({id:uid(),type:document.getElementById('cashType').value,method:document.getElementById('cashMethod').value,description,amount:Math.round(amount*100)/100,date});persistCash();closeModal();renderCash();showToast('Movimiento de caja guardado');};}
+document.getElementById('btnAddCash').onclick=openCashForm;document.getElementById('cashTypeFilter').onchange=renderCash;document.getElementById('cashMethodFilter').onchange=renderCash;document.getElementById('cashContent').addEventListener('click',e=>{const b=e.target.closest('[data-cashdel]');if(!b)return;const m=cashMovements.find(x=>x.id===b.dataset.cashdel);if(!m)return;if(m.sourceType){showToast('Este movimiento está vinculado a una venta, gasto, pedido o feria. Modificá el registro de origen para evitar diferencias en caja.');return;}if(!confirm('¿Eliminar este movimiento manual de caja?'))return;cashMovements=cashMovements.filter(x=>x.id!==m.id);persistCash();renderCash();showToast('Movimiento eliminado');});
+
+/* ---------------- Ingreso de mercadería y trazabilidad de stock ---------------- */
+function openRestockForm(){const root=document.getElementById('modalRoot');const options=items.map(it=>`<option value="${it.id}">${escapeHtml(it.name)}${it.code?' · '+escapeHtml(it.code):''}</option>`).join('');root.innerHTML=`<div class="overlay" id="restockOverlay"><div class="sheet"><div class="sheet-head"><h3>Ingreso de mercadería</h3><button class="close" id="restockClose">✕</button></div><label class="field"><span>Prenda</span><select id="restockProduct" class="tool-input"><option value="">Elegí una prenda</option>${options}</select></label><label class="field"><span>Talle</span><select id="restockSize" class="tool-input"><option value="">Elegí primero la prenda</option></select></label><label class="field"><span>Cantidad que ingresó</span><input type="number" id="restockQty" min="1" step="1" value="1"></label><label class="field"><span>Motivo / proveedor (opcional)</span><input type="text" id="restockReason" placeholder="Ej.: reposición proveedor"></label><div class="confirm-actions"><button class="btn-ghost" id="restockCancel">Cancelar</button><button class="btn-accent" id="restockSave">Sumar al stock</button></div></div></div>`;
+ const prod=document.getElementById('restockProduct'),size=document.getElementById('restockSize');function fillSizes(){const it=items.find(x=>x.id===prod.value);const existing=(it?.variants||[]).map(v=>v.size);size.innerHTML='<option value="">Elegí talle</option>'+[...new Set([...existing,...sizes])].map(x=>`<option value="${escapeHtml(x)}">Talle ${escapeHtml(x)}${existing.includes(x)?'':' (nuevo)'}</option>`).join('');}prod.onchange=fillSizes;const close=()=>closeModal();document.getElementById('restockClose').onclick=close;document.getElementById('restockCancel').onclick=close;document.getElementById('restockOverlay').onclick=e=>{if(e.target.id==='restockOverlay')close()};document.getElementById('restockSave').onclick=()=>{const it=items.find(x=>x.id===prod.value),sz=size.value,qty=Number(document.getElementById('restockQty').value),reason=document.getElementById('restockReason').value.trim()||'Ingreso de mercadería';if(!it||!sz){showToast('Elegí prenda y talle');return;}if(!Number.isInteger(qty)||qty<1){showToast('La cantidad debe ser un número entero mayor que cero');return;}let v=it.variants.find(x=>x.size===sz);if(!v){v={size:sz,qty:0};it.variants.push(v);if(!sizes.includes(sz)){sizes.push(sz);persistSizes();}}v.qty+=qty;logStockMove(it.id,it.name,sz,qty,reason);persistItems();closeModal();renderAll();showToast('Stock actualizado');};}
+document.getElementById('btnRestock').onclick=openRestockForm;
+document.getElementById('btnStockHistory').onclick=()=>{const panel=document.getElementById('stockHistoryPanel');panel.classList.toggle('hide');renderStockHistory();};document.getElementById('stockHistorySearch').addEventListener('input',renderStockHistory);
+function renderStockHistory(){const box=document.getElementById('stockHistoryContent');if(!box)return;const q=(document.getElementById('stockHistorySearch')?.value||'').trim().toLowerCase();const list=[...stockMoves].filter(m=>!q||(m.name+' '+m.size+' '+m.reason).toLowerCase().includes(q)).sort((a,b)=>Number(b.date)-Number(a.date)).slice(0,300);box.innerHTML=list.length?list.map(m=>`<div class="move-row"><strong>${escapeHtml(m.name)}</strong> · Talle ${escapeHtml(m.size||'—')} · <b class="${m.delta>0?'cash-positive':'cash-negative'}">${m.delta>0?'+':''}${m.delta}</b><div class="muted-note">${new Date(m.date).toLocaleString('es-AR')} · ${escapeHtml(m.reason)}</div></div>`).join(''):'<p class="muted-note">No hay movimientos para mostrar. El historial se empieza a completar desde que se activa esta versión; no reconstruye movimientos anteriores.</p>';}
+
+/* ---------------- Publicaciones y etiquetas imprimibles ---------------- */
+function openPostForm(){const root=document.getElementById('modalRoot');const options=items.map(it=>`<option value="${it.id}">${escapeHtml(it.name)}${it.code?' · '+escapeHtml(it.code):''}</option>`).join('');root.innerHTML=`<div class="overlay" id="postOverlay"><div class="sheet"><div class="sheet-head"><h3>Crear publicación</h3><button class="close" id="postClose">✕</button></div><label class="field"><span>Prenda</span><select id="postProduct" class="tool-input"><option value="">Elegí una prenda</option>${options}</select></label><label class="field"><span>Estilo de texto</span><select id="postStyle" class="tool-input"><option value="friendly">Cercano y tierno</option><option value="direct">Corto y directo</option><option value="fair">Para feria</option></select></label><label class="field"><span>Texto listo para copiar</span><textarea id="postText" rows="7" placeholder="Elegí una prenda para generar el texto"></textarea></label><div class="confirm-actions"><button class="btn-outline" id="postCopy">Copiar texto</button><button class="btn-accent" id="postShare">Compartir</button></div></div></div>`;
+ const select=document.getElementById('postProduct'),textArea=document.getElementById('postText');function build(){const it=items.find(x=>x.id===select.value);if(!it){textArea.value='';return;}const stock=it.variants.filter(v=>v.qty>0).map(v=>v.size).join(', ')||'consultar disponibilidad';const style=document.getElementById('postStyle').value;const intro=style==='direct'?'Disponible en Creciendo juntos.':style==='fair'?'¡Estamos preparando la feria! Mirá esta prenda de Creciendo juntos.':'¡Una opción hermosa para los peques! 💚';textArea.value=[intro,'','👕 '+it.name+(it.color?' · '+it.color:''),'📏 Talles: '+stock,...(it.price!==''&&it.price!=null?['💲 Precio: '+moneyFmt(it.price)]:[]),...(it.code?['Código: '+it.code]:[]),'','Consultanos por WhatsApp para confirmar disponibilidad.','','#CreciendoJuntos #RopitaInfantil #RopitaParaLosPeques'].join('\n');}
+ select.onchange=build;document.getElementById('postStyle').onchange=build;const close=()=>closeModal();document.getElementById('postClose').onclick=close;document.getElementById('postOverlay').onclick=e=>{if(e.target.id==='postOverlay')close()};document.getElementById('postCopy').onclick=async()=>{try{await navigator.clipboard.writeText(textArea.value);showToast('Texto copiado');}catch(e){textArea.focus();textArea.select();showToast('Seleccioná el texto y copiá');}};document.getElementById('postShare').onclick=async()=>{try{if(navigator.share)await navigator.share({text:textArea.value});else{await navigator.clipboard.writeText(textArea.value);showToast('Texto copiado para compartir');}}catch(e){if(e.name!=='AbortError')showToast('No se pudo abrir compartir; podés copiar el texto');}};}
+document.getElementById('btnMakePost').onclick=openPostForm;
+document.getElementById('btnPrintLabels').onclick=()=>{const available=items.filter(it=>it.price!==''&&it.price!=null&&it.price!==undefined);if(!available.length){showToast('Cargá el precio de al menos una prenda para imprimir etiquetas');return;}const html=`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Etiquetas de precios</title><style>body{font-family:Arial,sans-serif;margin:12mm}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm}.label{border:1px dashed #777;min-height:27mm;padding:4mm;display:flex;flex-direction:column;justify-content:space-between;break-inside:avoid}.brand{font-size:9pt;color:#4f7a6b}.name{font-size:11pt;font-weight:bold;overflow-wrap:anywhere}.code{font-size:8pt;color:#555}.price{font-size:18pt;font-weight:bold}@media print{button{display:none}body{margin:0}.grid{gap:3mm}.label{min-height:25mm}}</style></head><body><button onclick="window.print()">Imprimir</button><div class="grid">${available.map(it=>`<div class="label"><div class="brand">Creciendo juntos · Ropita para los peques</div><div class="name">${escapeHtml(it.name)}${it.color?' · '+escapeHtml(it.color):''}</div><div class="code">${it.code?'Código: '+escapeHtml(it.code)+' · ':''}Talles: ${escapeHtml(it.variants.map(v=>v.size).join(', '))}</div><div class="price">${moneyFmt(it.price)}</div></div>`).join('')}</div><script>window.addEventListener('load',()=>{});<\/script></body></html>`;const w=window.open('','_blank');if(!w){showToast('El navegador bloqueó la ventana. Permití ventanas emergentes para imprimir.');return;}w.document.open();w.document.write(html);w.document.close();};
+
+/* ---------------- Informes, conteo físico, promociones y vista agrupada ---------------- */
+function safeDateLabel(ts){const d=new Date(Number(ts)||Date.now());return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('es-AR');}
+function moneyValue(v){return Number.isFinite(Number(v))?Number(v):0;}
+function itemLabel(it){return `${it.name||'Prenda'}${it.color?' · '+it.color:''}${it.code?' · '+it.code:''}`;}
+function showStocktakeForm(){
+  const root=document.getElementById('modalRoot');
+  const options=items.map(it=>`<option value="${escapeHtml(it.id)}">${escapeHtml(itemLabel(it))}</option>`).join('');
+  root.innerHTML=`<div class="overlay" id="stocktakeOverlay"><div class="sheet"><div class="sheet-head"><h3>Conteo de stock físico</h3><button class="close" id="stocktakeClose">✕</button></div><label class="field"><span>Prenda</span><select id="stocktakeProduct" class="tool-input"><option value="">Elegí una prenda</option>${options}</select></label><label class="field"><span>Talle</span><select id="stocktakeSize" class="tool-input"><option value="">Elegí primero una prenda</option></select></label><div class="detail-row"><span class="k">Stock registrado</span><span class="v" id="stocktakeExpected">—</span></div><label class="field"><span>Unidades contadas físicamente</span><input id="stocktakeCounted" type="number" min="0" step="1" value="0"></label><label class="field"><span>Nota (opcional)</span><input id="stocktakeNote" type="text" placeholder="Ej.: faltaba una unidad en la feria"></label><p class="muted-note">Si hay diferencia, la app ajustará el stock al conteo y guardará el motivo en el historial. No cambia ventas ni gastos.</p><div class="confirm-actions"><button class="btn-ghost" id="stocktakeCancel">Cancelar</button><button class="btn-accent" id="stocktakeSave">Guardar conteo</button></div></div></div>`;
+  const product=document.getElementById('stocktakeProduct'),size=document.getElementById('stocktakeSize'),expected=document.getElementById('stocktakeExpected'),counted=document.getElementById('stocktakeCounted');
+  function fill(){const it=items.find(x=>x.id===product.value);size.innerHTML='<option value="">Elegí talle</option>'+(it?(it.variants||[]).map(v=>`<option value="${escapeHtml(v.size)}">Talle ${escapeHtml(v.size)}</option>`).join(''):'');expected.textContent='—';counted.value='0';}
+  function update(){const it=items.find(x=>x.id===product.value),v=it?.variants.find(x=>x.size===size.value);expected.textContent=v?String(v.qty):'—';counted.value=v?String(v.qty):'0';}
+  product.onchange=fill;size.onchange=update;
+  const close=()=>closeModal();document.getElementById('stocktakeClose').onclick=close;document.getElementById('stocktakeCancel').onclick=close;document.getElementById('stocktakeOverlay').onclick=e=>{if(e.target.id==='stocktakeOverlay')close()};
+  document.getElementById('stocktakeSave').onclick=()=>{const it=items.find(x=>x.id===product.value),sz=size.value,qty=Number(counted.value),v=it?.variants.find(x=>x.size===sz);if(!it||!sz||!v){showToast('Elegí una prenda y un talle existentes');return;}if(!Number.isInteger(qty)||qty<0){showToast('El conteo debe ser un número entero igual o mayor que cero');return;}const old=Number(v.qty)||0,delta=qty-old,note=document.getElementById('stocktakeNote').value.trim();stocktakes.push({id:uid(),date:Date.now(),itemId:it.id,name:it.name,color:it.color||'',size:sz,expected:old,counted:qty,delta,note});if(stocktakes.length>3000)stocktakes=stocktakes.slice(-3000);v.qty=qty;if(delta)logStockMove(it.id,it.name,sz,delta,`Conteo físico: ${old} → ${qty}${note?' · '+note:''}`);persistItems();persistStocktakes();closeModal();renderAll();renderStocktakes();showToast(delta?'Conteo guardado y stock ajustado':'Conteo guardado; no había diferencia');};
+}
+function renderStocktakes(){const box=document.getElementById('stocktakeContent');if(!box)return;const list=[...stocktakes].sort((a,b)=>b.date-a.date).slice(0,50);box.innerHTML=list.length?list.map(x=>`<div class="report-row"><strong>${escapeHtml(x.name)}</strong>${x.color?' · '+escapeHtml(x.color):''} · talle ${escapeHtml(x.size)}<div class="muted-note">${safeDateLabel(x.date)} · Sistema: ${x.expected} · Contado: ${x.counted} · Diferencia: <b class="${x.delta<0?'cash-negative':'cash-positive'}">${x.delta>0?'+':''}${x.delta}</b>${x.note?' · '+escapeHtml(x.note):''}</div></div>`).join(''):'<p class="muted-note">Todavía no hiciste conteos físicos.</p>';}
+function monthKeyForDate(date){return monthKey(Number(date)||Date.now());}
+function allMonthKeys(){const keys=new Set([monthKey(Date.now())]);sales.forEach(x=>keys.add(monthKeyForDate(x.soldAt||x.date)));expenses.forEach(x=>keys.add(monthKeyForDate(x.date)));return [...keys].sort().reverse();}
+function buildBusinessReport(key){
+  const ss=sales.filter(x=>monthKeyForDate(x.soldAt||x.date)===key),ee=expenses.filter(x=>monthKeyForDate(x.date)===key);
+  const revenue=ss.reduce((n,x)=>n+moneyValue(x.price),0),expenseTotal=ee.reduce((n,x)=>n+moneyValue(x.amount),0);
+  const operatingExpenseTotal=ee.filter(x=>!isStockPurchaseExpense(x)).reduce((n,x)=>n+moneyValue(x.amount),0);
+  const costRows=ss.filter(x=>x.cost!==null&&x.cost!==undefined&&x.cost!==''&&Number.isFinite(Number(x.cost)));
+  const costTotal=costRows.reduce((n,x)=>n+moneyValue(x.cost),0),margin=costRows.length===ss.length?revenue-costTotal:null;
+  const profit=margin===null?null:margin-operatingExpenseTotal;
+  const productMap=new Map();ss.forEach(x=>{const k=x.itemId||`${x.name||''}|${x.size||''}`;if(!productMap.has(k))productMap.set(k,{name:x.name||'Prenda',qty:0,revenue:0,cost:0,complete:true});const a=productMap.get(k);a.qty++;a.revenue+=moneyValue(x.price);if(x.cost===null||x.cost===undefined||x.cost==='')a.complete=false;else a.cost+=moneyValue(x.cost);});
+  const productRows=[...productMap.values()].sort((a,b)=>b.revenue-a.revenue);
+  return {key,ss,ee,revenue,expenseTotal,operatingExpenseTotal,costRows,costTotal,margin,profit,productRows};
+}
+function renderBusinessReports(){
+  const sel=document.getElementById('reportMonth'),box=document.getElementById('businessReportContent');if(!sel||!box)return;const keys=allMonthKeys(),prev=sel.value;sel.innerHTML=keys.map(k=>{const parts=k.split('-');const d=new Date(Number(parts[0]),Number(parts[1])-1,1);return `<option value="${k}">${d.toLocaleDateString('es-AR',{month:'long',year:'numeric'})}</option>`}).join('');if(keys.includes(prev))sel.value=prev;const r=buildBusinessReport(sel.value||keys[0]);
+  box.innerHTML=`<div class="report-grid"><div class="report-metric"><div class="num">${moneyFmt(r.revenue)}</div><div class="lbl">Ventas registradas</div></div><div class="report-metric"><div class="num">${moneyFmt(r.expenseTotal)}</div><div class="lbl">Gastos registrados (incluye compras de stock)</div></div><div class="report-metric"><div class="num">${r.margin===null?'Incompleto':moneyFmt(r.margin)}</div><div class="lbl">Margen bruto ${r.margin===null?'(faltan costos)':''}</div></div><div class="report-metric"><div class="num">${r.profit===null?'Incompleta':moneyFmt(r.profit)}</div><div class="lbl">Resultado estimado tras gastos</div></div></div><p class="muted-note">El resultado es estimado y solo se considera completo cuando todas las ventas del mes tienen costo guardado. Las compras de mercadería se muestran en gastos, pero se excluyen del resultado operativo para no descontarlas dos veces si el costo unitario ya está cargado. Si cargaste el mismo flete dentro del costo de la prenda y también como gasto, revisalo para evitar duplicarlo.</p><h3>Rentabilidad por producto</h3>${r.productRows.length?r.productRows.map(x=>`<div class="report-row"><strong>${escapeHtml(x.name)}</strong><div class="muted-note">${x.qty} unidad(es) · Ventas ${moneyFmt(x.revenue)} · ${x.complete?'Margen '+moneyFmt(x.revenue-x.cost):'Costo incompleto'}</div></div>`).join(''):'<p class="muted-note">No hay ventas en este mes.</p>'}`;
+}
+function downloadTextFile(name,text,mime='text/csv;charset=utf-8'){const blob=new Blob(['\ufeff',text],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function exportMonthlyCsv(){const key=document.getElementById('reportMonth')?.value||monthKey(Date.now()),r=buildBusinessReport(key);const quote=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const rows=[['Informe mensual Ropita Stock',key],[],['RESUMEN','Monto'],['Ventas registradas',r.revenue],['Gastos registrados (incluye compras de stock)',r.expenseTotal],['Gastos operativos usados para resultado',r.operatingExpenseTotal],['Costo de mercadería vendida conocido',r.costRows.reduce((n,x)=>n+moneyValue(x.cost),0)],['Margen bruto',r.margin===null?'INCOMPLETO':r.margin],['Resultado tras gastos',r.profit===null?'INCOMPLETO':r.profit],[],['PRODUCTOS','Unidades','Ventas','Costo conocido','Margen estimado']];r.productRows.forEach(x=>rows.push([x.name,x.qty,x.revenue,x.complete?x.cost:'INCOMPLETO',x.complete?x.revenue-x.cost:'INCOMPLETO']));rows.push([],['GASTOS','Categoría','Fecha','Monto']);r.ee.forEach(x=>rows.push([x.desc,x.category,safeDateLabel(x.date),moneyValue(x.amount)]));downloadTextFile(`ropita-stock-informe-${key}.csv`,rows.map(row=>row.map(quote).join(';')).join('\r\n'));showToast('Informe CSV preparado');}
+function renderGroupedVariants(){const box=document.getElementById('variantViewContent');if(!box)return;const groups=new Map();items.forEach(it=>{const k=String(it.name||'').trim().toLowerCase()||it.id;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(it);});const list=[...groups.values()].sort((a,b)=>(a[0].name||'').localeCompare(b[0].name||'','es'));box.innerHTML=list.length?list.map(group=>{const qty=group.reduce((n,it)=>n+totalQty(it),0);return `<div class="report-row"><strong>${escapeHtml(group[0].name||'Prenda')}</strong><div class="muted-note">${group.length} ficha(s) · ${qty} unidad(es) en total</div>${group.map(it=>`<div class="muted-note">${escapeHtml(it.color||'Sin color')} ${it.code?'· Código '+escapeHtml(it.code):''} — ${(it.variants||[]).map(v=>`${escapeHtml(v.size)}: ${v.qty}`).join(' · ')||'Sin talles'}</div>`).join('')}</div>`}).join(''):'<p class="muted-note">Todavía no hay productos cargados.</p>';}
+function openPromotionCalculator(){
+  const root=document.getElementById('modalRoot'),options=items.filter(it=>Number(it.price)>0).map(it=>`<option value="${escapeHtml(it.id)}">${escapeHtml(itemLabel(it))}</option>`).join('');
+  root.innerHTML=`<div class="overlay" id="promoOverlay"><div class="sheet"><div class="sheet-head"><h3>Calcular promoción</h3><button class="close" id="promoClose">✕</button></div><label class="field"><span>Prenda</span><select id="promoProduct" class="tool-input"><option value="">Elegí una prenda con precio</option>${options}</select></label><label class="field"><span>Tipo de promoción</span><select id="promoType" class="tool-input"><option value="percent">Descuento porcentual</option><option value="fixed">Precio promocional fijo</option><option value="bundle">Pack de varias unidades</option></select></label><label class="field"><span>Descuento (%) / precio final / cantidad en pack</span><input id="promoValue" type="number" min="1" step="0.01" value="10"></label><label class="field"><span>Unidades a vender (para estimar el resultado)</span><input id="promoQty" type="number" min="1" step="1" value="1"></label><div id="promoResult" class="extra-panel">Elegí una prenda para calcular.</div><label class="field"><span>Nombre de la promoción (opcional)</span><input id="promoName" type="text" placeholder="Ej.: Liquidación de invierno"></label><h3 style="font-size:1rem;margin:12px 0 6px">Promociones guardadas</h3><div id="promoHistory"></div><div class="confirm-actions"><button class="btn-ghost" id="promoCancel">Cerrar</button><button class="btn-accent" id="promoSave">Guardar promoción</button></div></div></div>`;
+  const prod=document.getElementById('promoProduct'),type=document.getElementById('promoType'),value=document.getElementById('promoValue'),qty=document.getElementById('promoQty'),result=document.getElementById('promoResult');let calc=null;
+  function calculate(){const it=items.find(x=>x.id===prod.value),price=moneyValue(it?.price),cost=moneyValue(it?.cost),v=Math.max(0,moneyValue(value.value)),n=Math.max(1,Math.floor(moneyValue(qty.value)||1));if(!it){result.textContent='Elegí una prenda para calcular.';calc=null;return;}let unit=price,label='',packQty=1;if(type.value==='percent'){unit=price*(1-Math.min(v,100)/100);label=`Descuento ${Math.min(v,100)}%`;}else if(type.value==='fixed'){unit=v;label='Precio promocional fijo';}else{packQty=Math.max(1,Math.floor(v));unit=price*packQty;label=`Pack de ${packQty} unidad(es)`;}const total=unit*n,costTotal=cost*packQty*n,margin=total-costTotal;calc={itemId:it.id,itemName:it.name,type:type.value,value:v,qty:n,unitPrice:unit,total,costTotal,margin,label,basePrice:price,packQty,costKnown:it.cost!==''&&it.cost!=null};result.innerHTML=`<div><strong>${escapeHtml(label)}</strong></div><div class="muted-note">Precio original: ${moneyFmt(price)} · Precio/importe promocional: ${moneyFmt(unit)} · Total estimado: ${moneyFmt(total)}</div><div class="muted-note">${calc.costKnown?'Costo estimado: '+moneyFmt(costTotal)+' · Margen estimado: '+moneyFmt(margin):'No hay costo cargado: no se puede calcular la ganancia real.'}</div>${calc.costKnown&&margin<0?'<p class="cash-negative">¡Atención! Esta promoción genera pérdida con el costo cargado.</p>':''}`;}
+  [prod,type,value,qty].forEach(el=>el.addEventListener('change',calculate));[value,qty].forEach(el=>el.addEventListener('input',calculate));const historyBox=document.getElementById('promoHistory');function renderPromoHistory(){const rows=[...promotions].sort((a,b)=>b.createdAt-a.createdAt).slice(0,10);historyBox.innerHTML=rows.length?rows.map(x=>`<div class="report-row"><strong>${escapeHtml(x.name||x.label||'Promoción')}</strong><div class="muted-note">${escapeHtml(x.itemName||'Prenda')} · ${moneyFmt(x.total)} estimado · ${safeDateLabel(x.createdAt)}</div></div>`).join(''):'<p class="muted-note">Todavía no guardaste promociones.</p>'; }renderPromoHistory();const close=()=>closeModal();document.getElementById('promoClose').onclick=close;document.getElementById('promoCancel').onclick=close;document.getElementById('promoOverlay').onclick=e=>{if(e.target.id==='promoOverlay')close()};document.getElementById('promoSave').onclick=()=>{if(!calc){showToast('Elegí una prenda y calculá la promoción');return;}promotions.push({...calc,id:uid(),name:document.getElementById('promoName').value.trim()||calc.label,createdAt:Date.now()});if(promotions.length>1000)promotions=promotions.slice(-1000);persistPromotions();renderPromoHistory();showToast('Promoción guardada en el historial');};calculate();
+}
+document.getElementById('btnStocktake').onclick=()=>{document.getElementById('stocktakePanel').classList.toggle('hide');renderStocktakes();if(!document.getElementById('stocktakePanel').classList.contains('hide'))showStocktakeForm();};
+document.getElementById('btnBusinessReports').onclick=()=>{document.getElementById('businessReportsPanel').classList.toggle('hide');renderBusinessReports();};
+document.getElementById('reportMonth').addEventListener('change',renderBusinessReports);
+document.getElementById('btnExportReportCsv').onclick=exportMonthlyCsv;
+document.getElementById('btnPromotionCalc').onclick=openPromotionCalculator;
+document.getElementById('btnVariantView').onclick=()=>{document.getElementById('variantViewPanel').classList.toggle('hide');renderGroupedVariants();};
 
 /* ---------------- Init ---------------- */
 function renderAll(){
@@ -1499,10 +1877,336 @@ function renderAll(){
   renderSales();
   renderExpenses();
   renderOrders();
+  renderDashboard();
+  renderClients();
+  renderSuppliers();
+  renderFairs();
+  renderCash();
+  renderStockHistory();
+  renderStocktakes();
+  renderBusinessReports();
+  renderGroupedVariants();
 }
 document.getElementById('whatsappNumber').value=shopSettings.whatsapp||'';
 renderAll();
-switchView('catalog');
+switchView('home');
+
+
+/* ---------------- Mejoras v8: caja vinculada, controles y alertas ---------------- */
+function addLinkedCash({sourceType,sourceId,type,method='Efectivo',description,amount,date=Date.now()}){
+  const n=Math.round((Number(amount)||0)*100)/100;
+  if(!sourceId || n<=0) return;
+  const existing=cashMovements.find(m=>m.sourceType===sourceType && m.sourceId===sourceId);
+  if(existing){existing.type=type;existing.method=method||'Efectivo';existing.description=description;existing.amount=n;existing.date=date;}
+  else cashMovements.push({id:uid(),sourceType,sourceId,type,method:method||'Efectivo',description,amount:n,date});
+  persistCash();
+}
+function removeLinkedCash(sourceType,sourceId){
+  const before=cashMovements.length;
+  cashMovements=cashMovements.filter(m=>!(m.sourceType===sourceType && m.sourceId===sourceId));
+  if(before!==cashMovements.length) persistCash();
+}
+function syncLinkedCashForExpense(expense, method='Efectivo'){
+  if(!expense || !expense.id) return;
+  addLinkedCash({sourceType:'expense',sourceId:expense.id,type:'out',method:expense.method||method,description:'Gasto: '+(expense.desc||'Sin descripción'),amount:expense.amount,date:expense.date||Date.now()});
+}
+function renderOperationalAlerts(){
+  let box=document.getElementById('operationalAlerts');
+  if(!box){
+    const home=document.getElementById('viewHome');
+    if(!home)return;
+    box=document.createElement('div');box.id='operationalAlerts';
+    const anchor=document.getElementById('lowStockContent');
+    if(anchor && anchor.parentElement) anchor.parentElement.insertBefore(box,anchor);
+    else home.appendChild(box);
+  }
+  const openOrders=orders.filter(o=>!['cancelled','delivered'].includes(o.status));
+  const overdue=openOrders.filter(o=>o.expiresAt && Number(o.expiresAt)<Date.now());
+  const debts=orders.filter(o=>o.status!=='cancelled' && orderBalance(o)>0);
+  const low=[];
+  items.forEach(it=>(it.variants||[]).forEach(v=>{if(Number(v.qty)<=2)low.push({name:it.name,color:it.color||'',size:v.size,qty:Number(v.qty)||0,code:it.code||''})}));
+  const noCost=items.filter(it=>it.cost===undefined||it.cost===null||it.cost==='');
+  const noCode=items.filter(it=>!String(it.code||'').trim());
+  const recentSoldIds=new Set(sales.filter(x=>Number(x.soldAt||x.date||0)>Date.now()-60*86400000).map(x=>x.itemId).filter(Boolean));
+  const slowMoving=items.filter(it=>totalQty(it)>0 && Number(it.createdAt||Date.now())<Date.now()-60*86400000 && !recentSoldIds.has(it.id));
+  const sections=[];
+  if(overdue.length) sections.push(`<div class="extra-panel"><strong>⏰ ${overdue.length} pedido(s) con reserva vencida</strong><div class="muted-note">Revisá si todavía están vigentes. La app no libera stock automáticamente para evitar cancelar pedidos por error.</div>${overdue.slice(0,5).map(o=>`<div class="report-row"><strong>${escapeHtml(o.customer||'Cliente')}</strong> · venció ${safeDateLabel(o.expiresAt)} <button type="button" data-release-expired="${escapeHtml(o.id)}" class="btn btn-outline" style="margin-top:6px">Revisar / liberar reserva</button></div>`).join('')}</div>`);
+  if(debts.length) sections.push(`<div class="extra-panel"><strong>💳 ${debts.length} cliente(s)/pedido(s) con saldo pendiente</strong><div class="muted-note">Total pendiente: ${moneyFmt(debts.reduce((n,o)=>n+orderBalance(o),0))||'$0'}. Revisá la sección Clientes.</div></div>`);
+  if(noCost.length) sections.push(`<div class="extra-panel"><strong>🧮 ${noCost.length} producto(s) sin costo de compra</strong><div class="muted-note">La ganancia estimada puede quedar incompleta. Cargá el costo por unidad en Stock → Editar.</div></div>`);
+  if(noCode.length) sections.push(`<div class="extra-panel"><strong>🏷️ ${noCode.length} producto(s) sin código</strong><div class="muted-note">Asignar códigos únicos ayuda a buscar, controlar y reponer sin confusiones.</div></div>`);
+  if(slowMoving.length) sections.push(`<div class="extra-panel"><strong>🐢 ${slowMoving.length} producto(s) sin ventas recientes</strong><div class="muted-note">Tienen stock y no registran ventas en los últimos 60 días. Podés evaluar una promoción o llevarlos a una feria.</div>${slowMoving.slice(0,5).map(it=>`<div class="report-row">${escapeHtml(itemLabel(it))} · ${totalQty(it)} unidad(es)</div>`).join('')}</div>`);
+  box.innerHTML=sections.length?`<h3 class="section-title">Pendientes para revisar</h3>${sections.join('')}`:`<div class="muted-note">No hay alertas operativas importantes por ahora.</div>`;
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-release-expired]');if(!b)return;const o=orders.find(x=>x.id===b.dataset.releaseExpired);if(!o)return;if(confirm('¿Cancelar el pedido vencido y devolver las unidades reservadas al stock? Los pagos quedarán en el historial del pedido.'))cancelOrder(o.id);});
+function validateUniqueProductCode(code, currentId){
+  const clean=String(code||'').trim().toLowerCase();
+  if(!clean)return true;
+  return !items.some(it=>it.id!==currentId && String(it.code||'').trim().toLowerCase()===clean);
+}
+// Wrap renderers so the new alerts and linked cash stay in sync with existing screens.
+const _renderCashV8=renderCash;
+renderCash=function(){_renderCashV8();const host=document.getElementById('cashContent');if(!host)return;let summary=document.getElementById('cashByMethod');if(!summary){summary=document.createElement('div');summary.id='cashByMethod';summary.className='extra-panel';host.parentElement.insertBefore(summary,host);}const methods=['Efectivo','Transferencia','Débito','Crédito','Billetera virtual','Otro'];summary.innerHTML='<strong>Balance por medio de pago</strong><div class="muted-note">Ingresos menos egresos registrados por cada medio. Los saldos no equivalen necesariamente al saldo real de tu cuenta.</div>'+methods.map(method=>{const rows=cashMovements.filter(x=>x.method===method);const value=rows.reduce((n,x)=>n+(x.type==='in'?1:-1)*(Number(x.amount)||0),0);return '<div class="report-row"><span>'+escapeHtml(method)+'</span> <strong style="float:right">'+(moneyFmt(value)||'$0')+'</strong></div>';}).join('');};
+const _renderDashboardV8=renderDashboard;
+renderDashboard=function(){_renderDashboardV8();renderOperationalAlerts();};
+const _renderAllV8=renderAll;
+renderAll=function(){_renderAllV8();renderOperationalAlerts();};
+
+// Unique code validation: intercept the existing save button before the original handler is called.
+const _openFormV8=openForm;
+openForm=function(id){
+  _openFormV8(id);
+  const btn=document.getElementById('saveForm');
+  if(!btn)return;
+  const original=btn.onclick;
+  btn.onclick=function(ev){
+    const code=document.getElementById('fCode')?.value||'';
+    if(!validateUniqueProductCode(code,id||null)){showToast('Ese código ya lo usa otra prenda. Elegí uno único.');return;}
+    return original.call(this,ev);
+  };
+};
+
+// Direct sale captures payment details and automatically creates one linked cash movement.
+const _confirmSellV8=confirmSell;
+confirmSell=function(id,size){
+  _confirmSellV8(id,size);
+  const modal=document.querySelector('#modalRoot #ov');
+  if(!modal)return;
+  const sheet=modal.querySelector('.sheet');
+  const actions=modal.querySelector('.confirm-actions');
+  if(!sheet||!actions||document.getElementById('salePayAmount'))return;
+  const it=items.find(x=>x.id===id);const price=Math.max(0,Number(it?.price)||0);
+  const fields=document.createElement('div');fields.innerHTML=`<label class="field"><span>Importe cobrado ahora (si fue fiado, poné 0)</span><input id="salePayAmount" type="number" min="0" max="${price}" step="0.01" value="${price}"></label><label class="field"><span>Medio de pago</span><select id="salePayMethod" class="tool-input"><option>Efectivo</option><option>Transferencia</option><option>Débito</option><option>Crédito</option><option>Billetera virtual</option><option>Otro</option><option>Fiado / pendiente</option></select></label>`;
+  sheet.querySelector('.confirm-box p')?.after(fields);
+  const customerFields=document.createElement('div');customerFields.innerHTML='<label class="field"><span>Cliente (opcional, útil si queda saldo)</span><input id="saleCustomer" type="text" maxlength="100" placeholder="Nombre de la clienta"></label><label class="field"><span>WhatsApp (opcional)</span><input id="saleCustomerPhone" type="tel" maxlength="30" placeholder="Número de contacto"></label>';
+  fields.after(customerFields);
+  document.getElementById('salePayMethod').addEventListener('change',e=>{if(e.target.value==='Fiado / pendiente')document.getElementById('salePayAmount').value='0';});
+  const ok=document.getElementById('okSell');
+  if(ok){const orig=ok.onclick;ok.onclick=function(ev){
+    const amount=Number(document.getElementById('salePayAmount')?.value||0);const method=document.getElementById('salePayMethod')?.value||'Efectivo';
+    if(!Number.isFinite(amount)||amount<0||amount>price||(method==='Fiado / pendiente'&&amount!==0)){showToast(method==='Fiado / pendiente'?'Si es fiado, el importe cobrado ahora debe ser $0.':'El cobro debe ser de $0 hasta el precio de venta ('+(moneyFmt(price)||'$0')+').');return;}
+    // Save the chosen payment to the sale after the existing handler adds it.
+    const customer=(document.getElementById('saleCustomer')?.value||'').trim();const phone=(document.getElementById('saleCustomerPhone')?.value||'').trim();const oldLen=sales.length;orig.call(this,ev);
+    if(sales.length>oldLen){const sale=sales[sales.length-1];sale.paid=Math.round(amount*100)/100;sale.balance=Math.max(0,price-amount);sale.paymentMethod=method;sale.customer=customer;sale.phone=phone;const prod=items.find(x=>x.id===sale.itemId);if(sale.cost!==null&&sale.cost!==undefined&&prod&&Number(prod.feePct)>0&&method!=='Fiado / pendiente')sale.cost=Math.round((Number(sale.cost)+price*Number(prod.feePct)/100)*100)/100;persistSales();if(amount>0)addLinkedCash({sourceType:'sale',sourceId:sale.id,type:'in',method,description:'Venta: '+sale.name+' · talle '+sale.size,amount,date:sale.soldAt});renderAll();}
+  };}
+};
+
+// Order initial deposits and later payments are recorded in cash exactly once.
+const _openOrderFormV8=openOrderForm;
+openOrderForm=function(){
+  _openOrderFormV8();
+  const btn=document.getElementById('saveOrderForm');if(!btn)return;
+  const methodField=document.createElement('label');methodField.className='field';methodField.innerHTML='<span>Medio de pago de la seña</span><select id="orderInitialMethod" class="tool-input"><option>Efectivo</option><option>Transferencia</option><option>Débito</option><option>Crédito</option><option>Billetera virtual</option><option>Otro</option></select>';
+  document.getElementById('orderPaid')?.closest('.field')?.after(methodField);
+  const expiryField=document.createElement('label');expiryField.className='field';const expiryDefault=new Date(Date.now()+3*86400000);expiryField.innerHTML='<span>Vencimiento de la reserva (opcional, sugerido: 3 días)</span><input id="orderExpires" type="date" value="'+expiryDefault.getFullYear()+'-'+String(expiryDefault.getMonth()+1).padStart(2,'0')+'-'+String(expiryDefault.getDate()).padStart(2,'0')+'">';
+  document.getElementById('orderNotes')?.closest('.field')?.before(expiryField);
+  const original=btn.onclick;
+  btn.onclick=function(ev){
+    const before=new Set(orders.map(o=>o.id));const amount=Number(document.getElementById('orderPaid')?.value||0);const method=document.getElementById('orderInitialMethod')?.value||'Efectivo';const expiresValue=document.getElementById('orderExpires')?.value||'';
+    original.call(this,ev);
+    const added=orders.find(o=>!before.has(o.id));
+    if(added&&expiresValue){added.expiresAt=new Date(expiresValue+'T23:59:59').getTime();persistOrders();}
+    if(added&&amount>0){added.payments=Array.isArray(added.payments)?added.payments:[];const initial=added.payments.find(p=>Number(p.amount)===amount)||added.payments[0];if(initial){initial.method=method;initial.initialCashRecorded=true;}persistOrders();addLinkedCash({sourceType:'order-payment',sourceId:added.id+'-initial',type:'in',method,description:'Seña pedido de '+added.customer,amount,date:initial?.date||Date.now()});renderAll();}
+  };
+};
+const _registerOrderPaymentV8=registerOrderPayment;
+registerOrderPayment=function(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  const before=moneyNum(o.paid);_registerOrderPaymentV8(id);
+  const after=moneyNum(o.paid);const delta=Math.round((after-before)*100)/100;
+  if(delta>0){const payment=(o.payments||[]).slice(-1)[0];const method=prompt('¿Con qué medio pagó? (Efectivo / Transferencia / Débito / Crédito / Billetera virtual / Otro)','Efectivo')||'Efectivo';if(payment)payment.method=method;persistOrders();const paymentId=o.id+'-'+(o.payments||[]).length+'-'+String(payment?.date||Date.now());addLinkedCash({sourceType:'order-payment',sourceId:paymentId,type:'in',method,description:'Cobro de pedido de '+o.customer,amount:delta,date:payment?.date||Date.now()});renderAll();}
+};
+
+// Every new expense is linked to an outgoing cash movement. Existing old expenses are left untouched.
+const _confirmDeleteSaleV8=confirmDeleteSale;
+confirmDeleteSale=function(id){const sale=sales.find(x=>x.id===id);if(!sale)return;if(sale.orderId||sale.fairId){showToast('Esta venta pertenece a un pedido o feria. No se puede borrar desde el historial individual para evitar diferencias en caja, stock y reportes.');return;}_confirmDeleteSaleV8(id);const btn=document.getElementById('okDelSale');if(!btn)return;const original=btn.onclick;btn.onclick=function(ev){original.call(this,ev);removeLinkedCash('sale',id);renderCash();};};
+const _openExpenseFormV8=openExpenseForm;
+openExpenseForm=function(id){
+  _openExpenseFormV8(id);
+  const btn=document.getElementById('saveExpForm');if(!btn)return;
+  const methodField=document.createElement('label');methodField.className='field';methodField.innerHTML='<span>Medio de pago del gasto</span><select id="expensePayMethod" class="tool-input"><option>Efectivo</option><option>Transferencia</option><option>Débito</option><option>Crédito</option><option>Billetera virtual</option><option>Otro</option><option>Pendiente de pago</option></select>';
+  document.getElementById('eDate')?.closest('.field')?.after(methodField);
+  const old=expenses.find(x=>x.id===id);if(old?.method)document.getElementById('expensePayMethod').value=old.method;
+  const original=btn.onclick;
+  btn.onclick=function(ev){
+    const oldObj=id?expenses.find(x=>x.id===id):null;const oldAmount=oldObj?.amount;const oldCash=oldObj?cashMovements.find(m=>m.sourceType==='expense'&&m.sourceId===oldObj.id):null;const selectedMethod=document.getElementById('expensePayMethod')?.value||'Efectivo';
+    original.call(this,ev);
+    if(document.getElementById('eDesc'))return; // validation kept the form open; do not touch any saved record
+    const current=id?expenses.find(x=>x.id===id):expenses[expenses.length-1];
+    if(current){
+      current.method=selectedMethod;persistExpenses();
+      if(current.method!=='Pendiente de pago')syncLinkedCashForExpense(current,current.method);else removeLinkedCash('expense',current.id);
+      renderAll();
+    }
+  };
+};
+// Removing an expense removes only its own linked cash entry, never unrelated manual movements.
+const _confirmDeleteExpenseV8=confirmDeleteExpense;
+confirmDeleteExpense=function(id){
+  _confirmDeleteExpenseV8(id);
+  const btn=document.getElementById('okDelExp');if(!btn)return;
+  const original=btn.onclick;btn.onclick=function(ev){original.call(this,ev);removeLinkedCash('expense',id);renderCash();};
+};
+
+// Fair sales and fair booth costs are linked to cash with unique source IDs.
+const _openFairFormV8=openFairForm;
+openFairForm=function(){
+  _openFairFormV8();const btn=document.getElementById('saveFair');if(!btn)return;const original=btn.onclick;
+  btn.onclick=function(ev){const before=new Set(fairs.map(f=>f.id));const method=document.getElementById('fairPayMethod')?.value||'Efectivo';original.call(this,ev);const fair=fairs.find(f=>!before.has(f.id));if(!fair)return;
+    addLinkedCash({sourceType:'fair-sales',sourceId:fair.id,type:'in',method,description:'Ventas de feria: '+fair.place,amount:fair.salesTotal,date:fair.date});
+    if(fair.cost>0){const ex=expenses.find(x=>x.fairId===fair.id);if(ex){ex.method='Efectivo';persistExpenses();syncLinkedCashForExpense(ex,'Efectivo');}}
+    renderAll();
+  };
+};
+
+// Ensure generated backup includes all current data, and tell users that local-only sync is a deliberate limitation.
+const _exportBackupV8=exportBackup;
+exportBackup=function(){_exportBackupV8();};
+renderOperationalAlerts();
+
+
+/* ---------------- Mejoras v10: cobros pendientes y protección de reservas ---------------- */
+function registerDirectSalePayment(saleId){
+  const sale=sales.find(x=>x.id===saleId);
+  if(!sale || sale.orderId || sale.fairId) return;
+  const total=Math.max(0,Number(sale.price)||0);
+  const paid=Math.max(0,Number(sale.paid)||0);
+  const balance=Math.max(0,Number(sale.balance!==undefined?sale.balance:total-paid));
+  if(balance<=0){showToast('Esta venta ya está paga');return;}
+  const raw=prompt(`Saldo pendiente de ${sale.name} (talle ${sale.size}): ${moneyFmt(balance)}. ¿Cuánto pagó ahora?`,String(balance));
+  if(raw===null)return;
+  const amount=Math.round(Number(raw)*100)/100;
+  if(!Number.isFinite(amount)||amount<=0||amount>balance){showToast('Ingresá un monto mayor a cero y no superior al saldo pendiente');return;}
+  const options='Efectivo, Transferencia, Débito, Crédito, Billetera virtual u Otro';
+  let method=prompt(`Medio de pago (${options}):`,'Efectivo');
+  if(method===null)return;
+  const normalized=String(method).trim().toLowerCase();
+  const allowed={'efectivo':'Efectivo','transferencia':'Transferencia','débito':'Débito','debito':'Débito','crédito':'Crédito','credito':'Crédito','billetera virtual':'Billetera virtual','otro':'Otro'};
+  if(!allowed[normalized]){showToast('Medio no reconocido. Usá Efectivo, Transferencia, Débito, Crédito, Billetera virtual u Otro.');return;}
+  method=allowed[normalized];
+  const payment={id:uid(),amount,date:Date.now(),method};
+  sale.payments=Array.isArray(sale.payments)?sale.payments:[];
+  sale.payments.push(payment);
+  sale.paid=Math.round((paid+amount)*100)/100;
+  sale.balance=Math.max(0,Math.round((total-sale.paid)*100)/100);
+  persistSales();
+  addLinkedCash({sourceType:'sale-payment',sourceId:sale.id+'-'+payment.id,type:'in',method,description:'Pago pendiente de venta: '+sale.name+' · talle '+sale.size,amount,date:payment.date});
+  renderAll();
+  showToast(sale.balance>0?'Cobro registrado; queda saldo pendiente':'Venta saldada');
+}
+
+// Rebuild the customer screen so unpaid direct sales can be collected without losing the existing order summary.
+renderClients=function(){
+  const q=(document.getElementById('clientSearch')?.value||'').trim().toLowerCase();
+  const groups=new Map();
+  const getGroup=(name,phone)=>{
+    const key=normalizedPhone(phone)||String(name||'').trim().toLowerCase();
+    if(!key)return null;
+    if(!groups.has(key))groups.set(key,{name:name||'Cliente sin nombre',phone:phone||'',orders:[],directSales:[],balance:0,total:0,paid:0});
+    const c=groups.get(key);if(!c.phone&&phone)c.phone=phone;if((!c.name||c.name==='Cliente sin nombre')&&name)c.name=name;
+    return c;
+  };
+  orders.filter(o=>o.status!=='cancelled').forEach(o=>{const c=getGroup(o.customer,o.phone);if(!c)return;c.orders.push(o);c.balance+=Math.max(0,orderBalance(o));c.total+=moneyNum(o.total);c.paid+=moneyNum(o.paid);});
+  sales.filter(x=>!x.orderId&&!x.fairId&&(String(x.customer||'').trim()||String(x.phone||'').trim())).forEach(s=>{const c=getGroup(s.customer,s.phone);if(!c)return;c.directSales.push(s);const paid=Math.max(0,Number(s.paid)||0);const balance=Math.max(0,Number(s.balance!==undefined?s.balance:moneyNum(s.price)-paid));c.balance+=balance;c.total+=moneyNum(s.price);c.paid+=paid;});
+  const list=[...groups.values()].filter(c=>!q||(c.name+' '+c.phone).toLowerCase().includes(q)).sort((a,b)=>b.balance-a.balance);
+  const empty=document.getElementById('clientsEmpty'),content=document.getElementById('clientsContent');
+  empty.classList.toggle('hide',list.length>0);
+  content.innerHTML=list.map(c=>{
+    const unpaid=(c.directSales||[]).filter(s=>Math.max(0,Number(s.balance!==undefined?s.balance:moneyNum(s.price)-(Number(s.paid)||0)))>0);
+    return `<div class="entity-card"><div class="entity-head"><div><div class="entity-name">${escapeHtml(c.name)}</div><div class="entity-meta">${escapeHtml(c.phone||'Sin teléfono')} · ${c.orders.length} pedido(s)${c.directSales.length?' · '+c.directSales.length+' venta(s) directa(s)':''}</div></div><strong style="color:${c.balance>0?'var(--danger)':'var(--accent)'}">Saldo ${moneyFmt(c.balance)||'$0'}</strong></div><div class="entity-meta">Total registrado: ${moneyFmt(c.total)||'$0'} · Pagado: ${moneyFmt(c.paid)||'$0'}</div>${unpaid.length?`<div class="muted-note"><strong>Ventas directas con saldo</strong></div>${unpaid.map(s=>`<div class="report-row"><span>${escapeHtml(s.name)} · talle ${escapeHtml(s.size)} — ${moneyFmt(Number(s.balance!==undefined?s.balance:moneyNum(s.price)-(Number(s.paid)||0)))}</span><button type="button" data-directsalepay="${escapeHtml(s.id)}" class="btn btn-outline">Registrar cobro</button></div>`).join('')}`:''}<div class="entity-actions">${c.phone?`<button data-clientwa="${escapeHtml(c.phone)}" data-clientname="${escapeHtml(c.name)}" data-clientbalance="${c.balance}">Enviar recordatorio por WhatsApp</button>`:''}${c.orders.length?`<button data-clientorders="${escapeHtml(customerKey(c.orders[0]))}">Ver pedidos</button>`:''}</div></div>`;
+  }).join('');
+};
+// Extend the existing customer actions with payment collection for direct sales.
+document.getElementById('clientsContent').addEventListener('click',e=>{const b=e.target.closest('[data-directsalepay]');if(b)registerDirectSalePayment(b.dataset.directsalepay);});
+
+// Do not delete a product while an active reservation still depends on it; otherwise cancelling the order could not restore its stock.
+const _confirmDeleteV10=confirmDelete;
+confirmDelete=function(id){
+  const it=items.find(x=>x.id===id);if(!it)return;
+  _confirmDeleteV10(id);
+  const btn=document.getElementById('okDel');if(!btn)return;
+  const original=btn.onclick;
+  btn.onclick=function(ev){
+    const active=orders.filter(o=>!['cancelled','delivered'].includes(o.status)&&(o.lines||[]).some(l=>l.itemId===id));
+    if(active.length){showToast('No se puede eliminar: esta prenda está reservada en un pedido activo. Cancelá o entregá el pedido primero.');return;}
+    return original.call(this,ev);
+  };
+};
+
+// When deleting a direct-sale record, remove its linked initial collection and any later partial collections.
+const _confirmDeleteSaleV10=confirmDeleteSale;
+confirmDeleteSale=function(id){
+  _confirmDeleteSaleV10(id);
+  const btn=document.getElementById('okDelSale');if(!btn)return;
+  const original=btn.onclick;
+  btn.onclick=function(ev){
+    original.call(this,ev);
+    cashMovements=cashMovements.filter(m=>!(m.sourceType==='sale-payment'&&String(m.sourceId||'').startsWith(id+'-')));
+    persistCash();
+    removeLinkedCash('sale',id);
+    renderCash();
+  };
+};
+
+
+/* ---------------- Mejoras v11: auditoría segura y caja protegida ---------------- */
+(function installDataAudit(){
+  const tools=document.querySelector('#viewAdmin .tool-buttons');
+  if(!tools||document.getElementById('btnDataAudit'))return;
+  const btn=document.createElement('button');btn.id='btnDataAudit';btn.type='button';btn.textContent='🛡️ Revisar datos';tools.appendChild(btn);
+  const panel=document.createElement('div');panel.id='dataAuditPanel';panel.className='extra-panel hide';panel.innerHTML='<h3>Revisión de datos</h3><p class="muted-note">Busca posibles inconsistencias sin cambiar ni borrar información. Revisá cada resultado antes de corregirlo.</p><div id="dataAuditResults"></div><div class="extra-actions"><button id="btnRunDataAudit" class="btn btn-accent" type="button">Volver a revisar</button><button id="btnExportDataAudit" class="btn btn-outline" type="button">Descargar revisión CSV</button></div>';
+  tools.after(panel);
+  let lastAudit=[];
+  const add=(severity,title,detail)=>lastAudit.push({severity,title,detail});
+  function runAudit(){
+    lastAudit=[];
+    const codes=new Map();
+    items.forEach(it=>{
+      const code=String(it.code||'').trim().toLowerCase();
+      if(code){if(!codes.has(code))codes.set(code,[]);codes.get(code).push(it);}
+      if(!Number.isFinite(Number(it.price))||Number(it.price)<0)add('Revisar','Precio inválido',`${it.name||it.id}: revisar el precio cargado.`);
+      if(it.cost!==''&&it.cost!==null&&it.cost!==undefined&&(!Number.isFinite(Number(it.cost))||Number(it.cost)<0))add('Revisar','Costo inválido',`${it.name||it.id}: revisar el costo de compra.`);
+      const sizes=new Set();
+      (Array.isArray(it.variants)?it.variants:[]).forEach(v=>{
+        const size=String(v.size||'').trim().toLowerCase();
+        if(size&&sizes.has(size))add('Revisar','Talle repetido en una prenda',`${it.name||it.id}: el talle ${v.size} aparece más de una vez.`);
+        if(size)sizes.add(size);
+        if(!Number.isInteger(Number(v.qty))||Number(v.qty)<0)add('Urgente','Cantidad de stock inválida',`${it.name||it.id}, talle ${v.size||'sin talle'}: cantidad ${v.qty}.`);
+      });
+    });
+    codes.forEach((rows,code)=>{if(rows.length>1)add('Urgente','Código de prenda duplicado',`Código ${code}: ${rows.map(x=>x.name||x.id).join(' / ')}.`);});
+    sales.forEach(s=>{
+      if(s.paid!==undefined||s.balance!==undefined){const total=moneyNum(s.price),paid=moneyNum(s.paid),balance=moneyNum(s.balance);if(paid<0||balance<0||paid>total+0.01||Math.abs((paid+balance)-total)>0.02)add('Revisar','Saldo de venta no coincide',`${s.name||s.id}, talle ${s.size||'—'}: total ${total}, pagado ${paid}, saldo ${balance}.`);}
+    });
+    orders.forEach(o=>{
+      if(moneyNum(o.paid)<0||moneyNum(o.paid)>moneyNum(o.total)+0.01)add('Revisar','Pago de pedido fuera de rango',`${o.customer||o.id}: total ${moneyNum(o.total)}, pagado ${moneyNum(o.paid)}.`);
+      (o.lines||[]).forEach(l=>{if(!items.some(it=>it.id===l.itemId)&&!['cancelled','delivered'].includes(o.status))add('Urgente','Pedido activo con prenda inexistente',`${o.customer||o.id}: falta la prenda ${l.name||l.itemId}, talle ${l.size||'—'}.`);});
+    });
+    cashMovements.forEach(m=>{
+      let orphan=false;
+      if(m.sourceType==='sale')orphan=!sales.some(s=>s.id===m.sourceId);
+      else if(m.sourceType==='sale-payment'){orphan=!sales.some(s=>String(m.sourceId||'').startsWith(s.id+'-'));}
+      else if(m.sourceType==='expense')orphan=!expenses.some(x=>x.id===m.sourceId);
+      else if(m.sourceType==='fair-sales')orphan=!fairs.some(x=>x.id===m.sourceId);
+      else if(m.sourceType==='order-payment')orphan=!orders.some(o=>String(m.sourceId||'').startsWith(o.id+'-'));
+      if(orphan)add('Revisar','Movimiento de caja vinculado sin registro',`${m.description||m.id}: revisar el origen antes de modificarlo.`);
+      if(!Number.isFinite(Number(m.amount))||Number(m.amount)<=0)add('Urgente','Importe de caja inválido',`${m.description||m.id}: importe ${m.amount}.`);
+    });
+    const missingCost=sales.filter(s=>s.cost===undefined||s.cost===null||s.cost==='').length;
+    if(missingCost)add('Información','Ventas sin costo registrado',`${missingCost} venta(s) no tienen costo; la ganancia puede ser incompleta.`);
+    const target=document.getElementById('dataAuditResults');
+    if(!lastAudit.length){target.innerHTML='<div class="report-row"><strong>No se encontraron inconsistencias en estas comprobaciones.</strong><div class="muted-note">Esto no reemplaza probar manualmente ventas, pedidos, gastos y respaldos.</div></div>';return;}
+    const order={'Urgente':0,'Revisar':1,'Información':2};lastAudit.sort((a,b)=>(order[a.severity]??3)-(order[b.severity]??3));
+    target.innerHTML=`<div class="muted-note">Se encontraron ${lastAudit.length} observación(es). No se modificó ningún dato.</div>`+lastAudit.map(x=>`<div class="report-row"><strong>${escapeHtml(x.severity)} · ${escapeHtml(x.title)}</strong><div class="muted-note">${escapeHtml(x.detail)}</div></div>`).join('');
+  }
+  btn.onclick=()=>{panel.classList.toggle('hide');if(!panel.classList.contains('hide'))runAudit();};
+  document.getElementById('btnRunDataAudit').onclick=runAudit;
+  document.getElementById('btnExportDataAudit').onclick=()=>{
+    if(!lastAudit.length)runAudit();
+    const rows=[['Nivel','Hallazgo','Detalle'],...lastAudit.map(x=>[x.severity,x.title,x.detail])];
+    const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
+    const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ropita-stock-revision-'+localDateInputValue()+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  };
+})();
 
 /* ---------------- PWA: registrar service worker ---------------- */
 if('serviceWorker' in navigator){
